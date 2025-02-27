@@ -1,0 +1,413 @@
+/* Light Mode Styles */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  justify-content: flex-start;
+  align-items: center;
+  min-height: 90vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  text-align: center;
+  padding-top: 6.5vh;
+}
+
+/* Dark Mode Support */
+.dark-mode .login-container {
+  background-color: #333;
+  color: white;
+  border: 1px solid #555;
+}
+
+/* Login header */
+.login-container h2 {
+  font-size: 26px;
+  font-weight: bold;
+  text-align: center;
+  width: 80%;
+  margin: 0 auto 25px;
+  padding: 12px;
+  background-color: rgba(0, 123, 255, 0.35);
+  border-radius: 23px;
+  color: #333;
+}
+
+/* Dark Mode Support for Header */
+.dark-mode .login-container h2 {
+  color: white;
+  background-color: rgba(0, 123, 255, 0.65);
+}
+
+/* Input group */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 600px;
+}
+
+/* Input fields */
+.login-container input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  outline: none;
+  transition: 0.3s;
+  text-align: left;
+}
+
+/* Dark Mode Input */
+.dark-mode .login-container input {
+  background-color: #333;
+  color: white;
+  border: 2px solid #777;
+}
+
+/* Input focus effect */
+/* Password input container */
+.password-input-container {
+  position: relative;
+  width: 100%;
+}
+
+/* Password field */
+.password-input-container input {
+  width: 100%;
+  padding: 14px;
+  padding-right: 45px; /* Ensure space for the icon */
+  font-size: 18px;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  outline: none;
+  transition: 0.3s;
+  text-align: left;
+}
+
+/* Password toggle button (Eye Icon) */
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #007bff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+}
+
+/* Style the Eye icon */
+.toggle-password svg {
+  width: 24px;
+  height: 24px;
+  transition: 0.3s;
+}
+
+/* Hover effect */
+.toggle-password:hover svg {
+  color: #0056b3;
+}
+
+/* Dark Mode Input */
+.dark-mode .password-input-container input {
+  background-color: #333;
+  color: white;
+  border: 2px solid #777;
+}
+
+/* Dark Mode Eye Icon */
+.dark-mode .toggle-password svg {
+  color: #66b3ff;
+}
+
+.dark-mode .toggle-password:hover svg {
+  color: #4a9ee3;
+}
+
+
+/* Login button */
+.login-container button {
+  width: 100%;
+  max-width: 400px;
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 8px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+/* Button hover effect */
+.login-container button:hover {
+  background-color: #0056b3;
+  box-shadow: 0 0 10px rgba(0, 91, 187, 0.5);
+}
+
+/* Dark Mode Button */
+.dark-mode .login-container button {
+  background-color: #0056b3;
+}
+
+.dark-mode .login-container button:hover {
+  background-color: #004494;
+}
+
+/* Error messages */
+.error {
+  color: #ff4444;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+/* Forgot password link */
+.forgot-password {
+  margin-top: 10px;
+  text-align: right;
+}
+
+.forgot-password a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
+
+/* Dark Mode Forgot Password Link */
+.dark-mode .forgot-password a {
+  color: #66b3ff;
+}
+
+/* Company logo */
+.company-logo {
+  display: block;
+  width: 230px;
+  height: auto;
+  margin-bottom: 15px;
+  max-width: 100%;
+  border-radius: 9px;
+  filter: contrast(150%);
+  clip-path: circle(80%);
+}
+
+/* Form container */
+.login-container form {
+  width: 100%;
+  max-width: 450px;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Dark Mode Form Container */
+.dark-mode .login-container form {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* Center the logo inside the form */
+.login-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 5px; /* Add spacing below */
+  margin-bottom: 2px;
+}
+
+/* Adjust logo size */
+.company-logo {
+  width: 150px; /* Adjust width as needed */
+  height: auto;
+  max-width: 100%;
+}
+
+/* Parent container to position the bars */
+.animated-border {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Prevents interaction */
+}
+
+/* Common styles for all bars */
+.bar {
+  position: absolute;
+  background: linear-gradient(90deg, red, blue, green, yellow);
+  height: 4px;
+  width: 0%;
+  animation-duration: 2s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* Top bar */
+.top {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  animation-name: move-top;
+  animation-delay: 0s;
+}
+
+/* Right bar */
+.right {
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  animation-name: move-right;
+  animation-delay: 0.5s;
+}
+
+/* Bottom bar */
+.bottom {
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 4px;
+  animation-name: move-bottom;
+  animation-delay: 1s;
+}
+
+/* Left bar */
+.left {
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  animation-name: move-left;
+  animation-delay: 1.5s;
+}
+
+/* Animations */
+
+/* Move top bar */
+@keyframes move-top {
+  0% { transform: translateX(-100%); }
+  25% { transform: translateX(0); }
+  50% { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Move right bar */
+@keyframes move-right {
+  0% { transform: translateY(-100%); }
+  25% { transform: translateY(-100%); }
+  50% { transform: translateY(100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* Move bottom bar */
+@keyframes move-bottom {
+  0% { transform: translateX(100%); }
+  25% { transform: translateX(100%); }
+  50% { transform: translateX(-100%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Move left bar */
+@keyframes move-left {
+  0% { transform: translateY(100%); }
+  25% { transform: translateY(100%); }
+  50% { transform: translateY(-100%); }
+  100% { transform: translateY(-100%); }
+}
+
+/* Ensure the form has enough space for the effect */
+.login-container {
+  position: relative;
+  padding: 50px;
+}
+
+.login-container form {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 2px solid #007bff;
+  padding: 30px;
+}
+
+/* Container to align Remember Me and Forgot Password */
+.remember-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 400px; /* Adjust as needed */
+  margin-top: 5px;
+}
+
+/* Remember Me Styling */
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 5px; /* Space between checkbox and label */
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Ensure checkbox and text align */
+.remember-me input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Forgot Password Styling */
+.forgot-password {
+  text-decoration: none;
+  color: #007bff;
+  font-size: 14px;
+  white-space: nowrap; /* Prevents text from wrapping */
+  margin-top: 5px;
+  font-weight: bold;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+
+/* Style for the signup link */
+.login-footer a {
+  color: #007bff; /* Blue color */
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* Hover effect */
+.login-footer a:hover {
+  text-decoration: underline;
+}
+

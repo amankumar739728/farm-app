@@ -1,0 +1,78 @@
+/* Default Light Mode */
+.app-header {
+  background-color: white;
+  color: black;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #ddd;
+}
+
+/* Dark Mode */
+.app-header.dark-mode {
+  background-color: #222;
+  color: white;
+  border-bottom: 2px solid #444;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: inherit; /* Inherit text color from header */
+}
+
+/* Logout Button */
+.logout-button {
+  background-color: red;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+/* ✅ Style the logo */
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.company-logo {
+  height: 50px; /* Adjust logo size */
+  width: auto;
+}
+
+/* Ensure logo visibility in dark mode */
+.dark-mode .company-logo {
+  filter: brightness(1.2);
+}
+
+
+.home-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--primary-color);
+  margin-top: 10px; /* ✅ Place below mode change */
+  transition: color 0.3s ease-in-out;
+}
+
+.home-button:hover {
+  color: var(--secondary-color);
+}
+
+.home-icon {
+  font-size: 20px;
+}
+
+.home-icon:hover {
+  color: var(--secondary-color);
+}
+
+
