@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 
 async def init_db():
     """Initialize MongoDB connection and register models."""
-    client = AsyncIOMotorClient(settings.DATABASE_URL, tls=True,tlsAllowInvalidCertificates=True)
+    client = AsyncIOMotorClient(settings.DATABASE_URL)
     # Extract the database name dynamically
     db_name = urlparse(settings.DATABASE_URL).path.lstrip("/")
     
