@@ -261,7 +261,7 @@ def initlogger():
     port = args.port
     service_name = args.service
 
-    logpath = f"/Application/GyanSys/{service_name}"
+    logpath = f"/tmp/GyanSys/{service_name}"
     access_logpath = os.path.join(logpath, 'accesslogs')
 
     # Create log directories if they don't exist
