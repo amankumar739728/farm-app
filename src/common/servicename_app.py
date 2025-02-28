@@ -656,7 +656,10 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 @app.middleware("http")
 async def validate_authenticity(request: Request, call_next):
     """Middleware to validate JWT token, but skip for token generation"""
-     # Skip token authentication for login and signup
+    # Skip preflight requests
+    if request.method == "OPTIONS":
+        return await call_next(request)
+    # Skip token authentication for login and signup
     if request.url.path.startswith("/login") or request.url.path.startswith("/signup"):
         return await call_next(request)
     if request.url.path.startswith("/refresh-token"):  # Skip token authentication for /refresh-token as well
@@ -664,8 +667,6 @@ async def validate_authenticity(request: Request, call_next):
     if request.url.path.startswith("/forgot-password"):  # Skip token authentication for /forgot-password as well
         return await call_next(request)
     if request.url.path.startswith("/reset-password"):  # Skip token authentication for /reset-password as well
-        return await call_next(request)
-    if request.method == "OPTIONS":  # Skip preflight requests
         return await call_next(request)
 
     authorization: str = request.headers.get('Authorization', '')
@@ -682,6 +683,7 @@ async def validate_authenticity(request: Request, call_next):
         return await call_next(request)
     except Exception:
         return JSONResponse(status_code=401, content={'detail': 'Unauthorized token'})
+    
 
         
 async def get_query_with_mariadb_pool(request, pool, query, resp_type="dict"):
