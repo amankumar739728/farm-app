@@ -99,7 +99,7 @@
 
 import axios from "axios";
 
-const API_URL = "http://localhost:9123";
+const API_URL = "https://farm-app-t7hi.onrender.com";
 
 const api = axios.create({
   baseURL: API_URL,

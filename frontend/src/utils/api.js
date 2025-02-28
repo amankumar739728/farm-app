@@ -15,7 +15,7 @@ export const useApi = () => {
   console.log("Using token for API requests:", token);
   
   const api = axios.create({
-    baseURL: 'http://localhost:9123',
+    baseURL: 'https://farm-app-t7hi.onrender.com',
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
