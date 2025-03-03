@@ -16,7 +16,6 @@ const Header = () => {
   const isLoginPage =
     location.pathname === "/" ||
     location.pathname === "/login" ||
-    location.pathname === "/signup" ||
     location.pathname === "/forgot-password" ||
     location.pathname === "/reset-password";
 
