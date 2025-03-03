@@ -1,8 +1,6 @@
 import React, { useContext } from "react";
 import { useLocation } from "react-router-dom";
 import { ThemeContext } from "../context/ThemeContext";
-import LogoutButton from "./LogoutButton";
-import { FaSignOutAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
 import "./Header.css";
@@ -35,20 +33,12 @@ const Header = () => {
           {isDarkMode ? "🌞 Light Mode" : "🌙 Dark Mode"}
         </button>
 
-        {/* ✅ Home Button for Forgot Password Page */}
-        {location.pathname === "/forgot-password" && (
-          <Link to="/login" className="home-button">
+        {/* ✅ Home Button for All Pages Except Login */}
+        {!(isLoginPage) && (
+          <Link to="/" className="home-button">
             <FaHome /> Home
           </Link>
         )}
-
-        {/* ✅ Home Button for All Pages Except Login, Signup, and Password Reset */} 
-        {!(isLoginPage || location.pathname === "/signup" || location.pathname === "/reset-password") && ( 
-          <Link to="/" className="home-button"> 
-            <FaHome /> Home 
-          </Link> 
-        )} 
-
       </div>
     </header>
   );
