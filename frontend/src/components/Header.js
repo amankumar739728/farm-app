@@ -18,6 +18,7 @@ const Header = () => {
   const isLoginPage =
     location.pathname === "/" ||
     location.pathname === "/login" ||
+    location.pathname === "/signup" ||
     location.pathname === "/forgot-password" ||
     location.pathname === "/reset-password";
 
@@ -41,12 +42,13 @@ const Header = () => {
           </Link>
         )}
 
-        {/* ✅ Show Logout Button Only If Not on Login/Forgot Password */}
-        {!isLoginPage && (
-          <LogoutButton>
-            <FaSignOutAlt /> Logout
-          </LogoutButton>
-        )}
+        {/* ✅ Home Button for All Pages Except Login, Signup, and Password Reset */} 
+        {!(isLoginPage || location.pathname === "/signup" || location.pathname === "/reset-password") && ( 
+          <Link to="/" className="home-button"> 
+            <FaHome /> Home 
+          </Link> 
+        )} 
+
       </div>
     </header>
   );
