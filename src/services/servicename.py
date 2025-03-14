@@ -12,6 +12,7 @@ from common.servicename_app import get_query_with_pool
 from utils.utils import queries
 # from utils.arrow_utils import ArrowUtils
 from schema.schema import SampleResponse
+from models.models import Team
 
 class Mainclass():
     def __init__(self, request,conn):
@@ -33,3 +34,8 @@ class Mainclass():
             "reversed_city": data.city.upper()[::-1]
         }
         return formatted_response
+    
+    async def get_team_players(self):
+        # Assuming you store teams in a collection
+        teams = await Team.find_all().to_list()
+        return teams

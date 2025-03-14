@@ -1,5 +1,5 @@
 from pydantic import BaseModel,EmailStr
-from typing import List
+from typing import List,Optional
 
 class AuthRequest(BaseModel):
     username: str
@@ -7,6 +7,11 @@ class AuthRequest(BaseModel):
 class LoginUser(BaseModel):
     username: str
     password: str
+    
+class Token(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
 
 class SampleResponse(BaseModel):
     message: str
@@ -20,6 +25,7 @@ class SampleData(BaseModel):
 class TeamCreateSchema(BaseModel):
     team_name: str
     team_owner: str
+    team_logo: Optional[str] = None
     
 class PlayerAuctionSchema(BaseModel):
     player_name: str

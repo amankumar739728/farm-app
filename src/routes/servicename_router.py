@@ -23,9 +23,9 @@ from datetime import timedelta
 from config import settings
 import jwt
 from passlib.context import CryptContext
-from utils.auth_utils import create_access_token, verify_refresh_token,verify_password,hash_password
+from utils.auth_utils import create_access_token,create_refresh_token, verify_refresh_token,verify_password,hash_password
 from models.models import User,ResetToken
-from schema.schema import LoginUser
+from schema.schema import LoginUser,Token
 import secrets
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 
@@ -117,7 +117,7 @@ fake_users_db = {
 #     token = generate_jwt(payload.username)
 #     return {"access_token": token, "token_type": "bearer"}
 
-@app.post("/login")
+@app.post("/login",response_model=Token)
 async def login(payload: LoginUser):
     if not payload.username or not payload.password:
         raise HTTPException(status_code=400, detail="Username/email and password are required")
@@ -135,9 +135,11 @@ async def login(payload: LoginUser):
         raise HTTPException(status_code=401, detail="Invalid username/email or password")
 
     # Generate JWT token with the stored username
-    token = generate_jwt(stored_user.username)  
+    # Generate JWT tokens
+    access_token = create_access_token(data={"sub": stored_user.username})
+    refresh_token = create_refresh_token(data={"sub": stored_user.username})
 
-    return {"access_token": token, "token_type": "bearer"}
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
 
 @router.post("/refresh-token", response_model=TokenRefreshResponse)
@@ -147,14 +149,14 @@ async def refresh_token(request: TokenRefreshRequest):
         payload = verify_refresh_token(request.refresh_token)
         # Create new access token
         access_token = create_access_token(
-            data={"username": payload["sub"]},
-            expires_delta=datetime.timedelta(hours=1)
+            data={"sub": payload["sub"]},
+            expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         )
         
         return {
             "access_token": access_token,
             "token_type": "bearer",
-            "expires_in": 3600
+            "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
         }
     except Exception as e:
         raise HTTPException(

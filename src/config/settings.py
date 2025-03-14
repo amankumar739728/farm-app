@@ -40,6 +40,8 @@ load_dotenv(dotenv_path=env_path)
 SECRET_KEY = os.environ.get('SECRET_KEY')
 PASSWORD_SECRET_KEY = os.environ.get('PASSWORD_SECRET_KEY')
 REFRESH_SECRET_KEY = os.environ.get('REFRESH_SECRET_KEY')
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get('ACCESS_TOKEN_EXPIRE_MINUTES'))
+REFRESH_TOKEN_EXPIRE_DAYS = int(os.environ.get('REFRESH_TOKEN_EXPIRE_DAYS'))
 
 OAUTH_INTROSPECT_ENDPOINT = os.environ.get('OAUTH_INTROSPECT_ENDPOINT')
 OAUTH_CLIENT_ID = os.environ.get('OAUTH_CLIENT_ID')
@@ -69,7 +71,6 @@ MR_POOL_MIN_SIZE = int(os.environ.get('MR_POOL_MIN_SIZE'))
 MR_POOL_MAX_SIZE = int(os.environ.get('MR_POOL_MAX_SIZE'))
 
 DATABASE_URL = os.environ.get('DATABASE_URL')
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get('ACCESS_TOKEN_EXPIRE_MINUTES'))
 
 
 MAIL_USERNAME = os.environ.get('MAIL_USERNAME')

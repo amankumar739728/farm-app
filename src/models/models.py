@@ -18,6 +18,7 @@ class Team(Document):
     remaining_budget: int = 100000  # Initially, same as total budget
     used_budget: int = 0  # Initially zero
     players: List[PlayerAuction] = []  # List of auctioned players
+    team_logo: Optional[str] = None 
 
     class Settings:
         name = "Team"  # MongoDB Collection Name

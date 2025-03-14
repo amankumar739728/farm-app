@@ -1,6 +1,13 @@
-from fastapi import APIRouter, HTTPException
+import re
+from fastapi import APIRouter, HTTPException,Depends,Request
 from models.models import Team, PlayerAuction,format_team_name
-from schema.schema import TeamCreateSchema,TeamSchema
+from schema.schema import TeamCreateSchema,TeamSchema 
+from typing import List
+from common.servicename_app import app,get_current_user
+from services.servicename import Mainclass
+from utils.constants import Constants
+from services.servicename import Mainclass
+
 
 router = APIRouter()
 
@@ -11,28 +18,23 @@ async def create_team(team: TeamCreateSchema):
     existing_team = await Team.find_one(Team.team_name == team.team_name)
     if existing_team:
         raise HTTPException(status_code=400, detail="Team already exists")
-
-    new_team = Team(team_name=team.team_name,team_owner=team.team_owner)
+    new_team = Team(team_name=team.team_name,team_owner=team.team_owner,team_logo=team.team_logo)
+    print("New Team Data:", new_team)
     await new_team.insert()
     return {"message": f"Team {team.team_name} created successfully!"}
 
+# 🔍 **Get Team List (New Endpoint)**
+@router.get("/auction/team_list", response_model=List[str],)
+async def get_all_team_names(current_user: dict = Depends(get_current_user)):
+    teams = await Team.find().to_list()
+    if not teams:
+        raise HTTPException(status_code=404, detail="No teams found")
+    team_names = [team.team_name for team in teams]  # Extract team_name only
+    return team_names  # Return list of team names
 
 # 🔍 **Get Team Info**
-# @router.get("/auction/team_details/{team_name}")
-# async def get_team(team_name: str):
-#     # format the team name
-#     formatted_team_name = format_team_name(team_name) 
-#     print("Formatted Team Name:", formatted_team_name)
-#     team = await Team.find_one(Team.team_name == formatted_team_name)
-#     #Case-insensitive search in MongoDB
-#     team = await Team.find_one({"team_name": {"$regex": f"^{formatted_team_name}$", "$options": "i"}})
-#     if not team:
-#         raise HTTPException(status_code=404, detail="Team not found please enter the team in capital Letters")
-#     return team.dict(exclude={"id"})
-
-
 @router.get("/auction/team_details/{team_name}")
-async def get_team(team_name: str):
+async def get_team(team_name: str,current_user: dict = Depends(get_current_user)):
     formatted_team_name = format_team_name(team_name)  # Format correctly
     print("Formatted Team Name:", formatted_team_name)
     search_pattern = f"^{formatted_team_name[:4]}"  # First 4 letters
@@ -48,7 +50,12 @@ async def get_team(team_name: str):
             detail=f"Team '{formatted_team_name}' not found. Try passing a correct team name in capitals seperated by space."
         )
 
-    return team.dict(exclude={"id"})
+    # Ensure the team_logo is included in the response
+    team_details = team.dict(exclude={"id"})
+    team_details["team_logo"] = team.team_logo  # Add the team logo URL
+
+    return team_details
+
 
 
 # 💰 **Add Player to Team (Auction Purchase)**
@@ -82,3 +89,52 @@ async def add_player_to_team(team_name: str, player: PlayerAuction):
     await team.save()
 
     return {"message": f"Player {player.player_name} sold to {team_name} with point {player.points_spent}"}
+ 
+
+@router.get("/auction/player/{player_name}")
+async def get_player_by_name(request: Request, player_name: str, current_user: dict = Depends(get_current_user)):
+    if not player_name:
+        raise HTTPException(status_code=400, detail="Please provide a player_name")
+    # Normalize the player name to lowercase for case-insensitive search
+    normalized_player_name = player_name.lower()
+    # Compile the regular expression
+    pattern = re.compile(normalized_player_name, re.IGNORECASE)
+
+    res = Mainclass(request, app.state.pool)
+    teams = await res.get_team_players()  # Fetch all teams' player details
+
+    matching_players = []
+
+    for team in teams:
+        for player in team.players:
+            if pattern.search(player.player_name):
+                matching_players.append({
+                    "team_name": team.team_name,
+                    "player_name": player.player_name,
+                    "employee_id": player.employee_id,
+                    "points_spent": player.points_spent
+                })
+
+    if not matching_players:
+        raise HTTPException(status_code=404, detail="Player not found")
+
+    return matching_players
+
+
+@router.get("/auction/playerdetails/{employee_id}")   
+async def get_player_by_name(request: Request, employee_id: str,current_user: dict = Depends(get_current_user)):
+    if not employee_id:
+        raise HTTPException(status_code=400, detail="Provided employee_id does not exist!")
+    res = Mainclass(request, app.state.pool)
+    teams = await res.get_team_players()  # Fetch all teams' player details
+    for team in teams:
+        for player in team.players:
+            if player.employee_id == employee_id:
+                return {
+                    "team_name": team.team_name,
+                    "player_name": player.player_name,
+                    "employee_id": player.employee_id,
+                    "points_spent": player.points_spent
+                }
+
+    raise HTTPException(status_code=404, detail="Player not found")

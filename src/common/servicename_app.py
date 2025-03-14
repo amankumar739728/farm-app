@@ -499,6 +499,8 @@ async def add_process_time_header(request: Request, call_next):
     response = await call_next(request)
     process_time = time.time() - start_time
     response.headers["X-Process-Time"] = str(process_time)
+    response.headers['Access-Control-Allow-Origin'] = '*'  
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
     return response
 
 # Token Cache
@@ -580,28 +582,24 @@ async def verify_jwt(request: Request, authorization: str):
 #             detail="Invalid authentication credentials",
 #             headers={"WWW-Authenticate": "Bearer"},
 #         )
-
-
-
-def get_current_user(token: str = Depends(oauth2_scheme)):
+        
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         app_log.info(f"Token payload: {payload}")
-        username: str = payload.get("sub")  # ✅ Extract "sub" instead of "username"
+        username: str = payload.get("sub") # ✅ Extract "sub" instead of "username"
         if username is None:
             app_log.error("Token missing username in payload")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials",
-            )
-        return username
+            raise credentials_exception
     except JWTError as e:
         app_log.error(f"JWT verification failed: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise credentials_exception
+    return username
 
 
 # Middleware to validate JWT token
@@ -660,6 +658,8 @@ async def validate_authenticity(request: Request, call_next):
     if request.method == "OPTIONS":
         return await call_next(request)
     # Skip token authentication for login and signup
+    if request.url.path.startswith("/docs") or request.url.path.startswith("/openapi.json"):
+        return await call_next(request)
     if request.url.path.startswith("/login") or request.url.path.startswith("/signup"):
         return await call_next(request)
     if request.url.path.startswith("/refresh-token"):  # Skip token authentication for /refresh-token as well
@@ -675,14 +675,19 @@ async def validate_authenticity(request: Request, call_next):
     schema, param = AuthUtil.get_authorization_scheme_param(authorization)
 
     if not authorization or schema.lower() != 'bearer':
-        return JSONResponse(status_code=401, content={'detail': 'Unauthorized, No/Invalid Bearer Token Passed'})
+        return JSONResponse(status_code=403, content={'detail': 'Unauthorized, No/Invalid Bearer Token Passed'})
 
     try:
         payload = await verify_jwt(request, param)
         request.state.security_context = payload
         return await call_next(request)
     except Exception:
-        return JSONResponse(status_code=401, content={'detail': 'Unauthorized token'})
+        headers = {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+        }
+        return JSONResponse(status_code=401, content={'detail': 'Unauthorized token'}, headers=headers)
     
 
         

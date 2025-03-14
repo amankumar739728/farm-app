@@ -32,9 +32,9 @@
 
 import time
 import jwt
-import datetime
+# import datetime
 from typing import Tuple
-from datetime import timedelta
+from datetime import datetime,timedelta
 from fastapi import HTTPException
 
 import httpx
@@ -100,7 +100,7 @@ class AuthUtil:
 
 def generate_jwt(username: str):
     """Generate a secure JWT token."""
-    expiration = datetime.datetime.utcnow() + datetime.timedelta(hours=1)  
+    expiration = datetime.utcnow() + timedelta(hours=1)  
     payload = {
         "sub": username,  # ✅ Use "sub" instead of "username"
         "exp": expiration
@@ -108,14 +108,30 @@ def generate_jwt(username: str):
     token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return token
 
-def create_access_token(data: dict, expires_delta: datetime.timedelta):
+def create_access_token(data: dict, expires_delta: timedelta =None):
     to_encode = data.copy()
-    expire = datetime.datetime.utcnow() + expires_delta
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
+
+def create_refresh_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.REFRESH_SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
 
 
 def verify_refresh_token(token: str):
+    print(f"Verifying refresh token: {token}")  # Log the token being validated
+
     try:
         payload = jwt.decode(token, settings.REFRESH_SECRET_KEY, algorithms=[settings.ALGORITHM])
         return payload
@@ -135,6 +151,3 @@ def hash_password(password: str) -> str:
         
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
-
-    
-    
