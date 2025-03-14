@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://farm-app-t7hi.onrender.com",
+  "proxy": "https://farm-app-frontend.onrender.com",
   "homepage": "/",
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
