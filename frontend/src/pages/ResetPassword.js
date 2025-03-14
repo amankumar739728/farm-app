@@ -32,7 +32,7 @@ const ResetPassword = () => {
       return;
     }
     try {
-      const response = await fetch("http://127.0.0.1:9123/reset-password", {
+      const response = await fetch("https://farm-app-t7hi.onrender.com/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, new_password: newPassword }),
