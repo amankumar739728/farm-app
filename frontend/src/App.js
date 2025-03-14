@@ -116,6 +116,7 @@ import ForgotPassword from "./pages/ForgotPassword"; // ✅ Import Forgot Passwo
 import Signup from "./pages/Signup";
 import PrivateRoute from "./components/PrivateRoute";
 import Header from "./components/Header"; // ✅ Include Header
+import Auction from "./pages/Auction";
 
 function App() {
   return (
@@ -128,6 +129,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/reset-password" element={<ResetPassword />} /> {/* ✅ Add Reset Password Route */}
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/auction" element={<Auction />} />
       </Routes>
     </>
   );

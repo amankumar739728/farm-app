@@ -248,6 +248,7 @@
 
 
 // src/pages/Dashboard.js
+// src/pages/Dashboard.js
 import "./Dashboard.css";
 import React, { useState, useContext } from "react";
 import api from "../api/api";
@@ -255,27 +256,22 @@ import { ThemeContext } from "../context/ThemeContext";
 import Navbar from "../components/Navbar";
 import GetEndpoint from "../components/GetEndpoint";
 import PostEndpoint from "../components/PostEndpoint";
-
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(null);
   const [sampleResponse, setSampleResponse] = useState(null);
   const [dynamicResponse, setDynamicResponse] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
   // State for POST endpoint
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [city, setCity] = useState("");
-
   const { isDarkMode } = useContext(ThemeContext);
-
   // Handle GET request
   const handleDetailsClick = async (fullname) => {
     if (!fullname) {
       alert("Please enter a fullname");
       return;
     }
-
     setIsLoading(true);
     try {
       const response = await api.get(`/v1/sample/response/${fullname}`);
@@ -286,14 +282,12 @@ const Dashboard = () => {
       setIsLoading(false);
     }
   };
-
   // Handle POST request
   const handleDynamicResponseClick = async (payload) => {
     if (!payload.name || !payload.age || !payload.city) {
       alert("Please fill all fields: name, age, and city");
       return;
     }
-
     setIsLoading(true);
     try {
       const response = await api.post("/v1/sample/dynamic-response", {
@@ -310,11 +304,9 @@ const Dashboard = () => {
       setIsLoading(false);
     }
   };
-
   const handleBackToDashboard = () => {
     setActiveTab(null);
   };
-
   return (
     <div className={`dashboard-container ${isDarkMode ? "dark-mode" : ""}`}>
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -360,5 +352,4 @@ const Dashboard = () => {
     </div>
   );
 };
-
 export default Dashboard;

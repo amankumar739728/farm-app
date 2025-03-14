@@ -2,7 +2,8 @@ import React, { useContext } from "react";
 import { useLocation } from "react-router-dom";
 import { ThemeContext } from "../context/ThemeContext";
 import { Link } from "react-router-dom";
-import { FaHome } from "react-icons/fa";
+// import { FaHome } from "react-icons/fa";
+import { FaSignOutAlt } from "react-icons/fa";
 import "./Header.css";
 
 import lightLogo from "../assets/company-logo-light.png";
@@ -35,7 +36,7 @@ const Header = () => {
         {/* ✅ Home Button for All Pages Except Login */}
         {!(isLoginPage) && (
           <Link to="/" className="home-button">
-            <FaHome /> Home
+            <FaSignOutAlt /> Logout
           </Link>
         )}
       </div>

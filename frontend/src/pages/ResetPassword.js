@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import "./ResetPassword.css"; // ✅ Import CSS file
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import "./ResetPassword.css"; // Import CSS file
+import { FaHome } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa"; // Import arrow icon
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -12,7 +14,6 @@ const ResetPassword = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // ✅ If no token in URL, show an error immediately
     if (!token) {
       setError("Invalid or missing reset token.");
     }
@@ -22,27 +23,21 @@ const ResetPassword = () => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
-
-    // ✅ Check if passwords match before making the request
     if (newPassword !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
-
     if (!token) {
       setError("Reset token is missing or invalid.");
       return;
     }
-
     try {
-      const response = await fetch("https://farm-app-t7hi.onrender.com/reset-password", {
+      const response = await fetch("http://127.0.0.1:9123/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, new_password: newPassword }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         setSuccessMessage("✅ Password reset successful! Redirecting to login...");
         setTimeout(() => navigate("/login"), 3000);
@@ -77,6 +72,15 @@ const ResetPassword = () => {
           />
           <button type="submit" disabled={!token}>Reset Password</button>
         </form>
+        {/* Home & Forgot Password Buttons */}
+        <div className="reset-buttons">
+          <Link to="/forgot-password" className="back-button-reset">
+            <FaArrowLeft /> Back
+          </Link>
+          <Link to="/login" className="home-button-reset">
+            <FaHome /> Home
+          </Link>
+        </div>
       </div>
     </div>
   );

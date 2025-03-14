@@ -3,26 +3,18 @@ import api from "./api";
 export const login = async (username, password) => {
   try {
     const response = await api.post("/login", { username, password });
-    
-    console.log("API Response:", response.data);
+    const { access_token, refresh_token } = response.data; // Ensure keys match the response
 
-    const { access_token } = response.data;
-    if (!access_token) throw new Error("No token received");
+    console.log("Login response:", response.data); // Log the response data
 
-    // Verify token structure
-    const tokenParts = access_token.split('.');
-    if (tokenParts.length !== 3) {
-      throw new Error("Invalid token format");
-    }
-    
+    if (!access_token || !refresh_token) throw new Error("No token received");
+
     localStorage.setItem("token", access_token);
-    console.log("Token stored in localStorage:", access_token);
-    console.log("Token payload:", JSON.parse(atob(tokenParts[1])));
+    localStorage.setItem("refreshToken", refresh_token); // Ensure consistent key usage
 
+    console.log("Tokens stored in localStorage:", { access_token, refresh_token });
 
     return access_token;
-
-
   } catch (error) {
     console.error("Login Error:", error.response?.data?.detail || error.message);
     throw error;
@@ -31,35 +23,33 @@ export const login = async (username, password) => {
 
 export const refreshToken = async () => {
   try {
-    const response = await api.post("/refresh-token");
+    const tokenRefresh = window.test_token_refresh; // Retrieve from memory
+    console.log("Refresh token ...", tokenRefresh);
+    if (!tokenRefresh) throw new Error("No refresh token available");
 
+    const response = await api.post("/refresh-token", { refresh_token: tokenRefresh });
+    const newAccessToken = response.data.access_token;
 
-    const newToken = response.data.access_token;
-    
-    if (!newToken) throw new Error("No token received from refresh");
+    if (!newAccessToken) throw new Error("No token received from refresh");
 
-    // Verify token structure
-    const tokenParts = newToken.split('.');
+    const tokenParts = newAccessToken.split('.');
     if (tokenParts.length !== 3) {
       throw new Error("Invalid token format");
     }
-    
-    localStorage.setItem("token", newToken);
-    console.log("New token stored after refresh:", newToken);
+
+    localStorage.setItem("token", newAccessToken);
+    console.log("New token stored after refresh:", newAccessToken);
     console.log("Token payload:", JSON.parse(atob(tokenParts[1])));
 
-    
-    return newToken;
+    return newAccessToken;
   } catch (error) {
     console.error("Token refresh failed:", error);
     throw error;
   }
 };
 
-
 export const logout = () => {
   localStorage.removeItem("token");
-  localStorage.removeItem("refresh_token");
-
+  localStorage.removeItem("tokenRefresh"); // Ensure key matches
   window.location.href = '/login';
 };

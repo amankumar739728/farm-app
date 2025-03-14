@@ -8,17 +8,16 @@ const ForgotPassword = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [resetLink, setResetLink] = useState("");
+  const [resetToken, setResetToken] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setMessage("");
-    setResetLink("");
 
     try {
-      const response = await fetch("https://farm-app-t7hi.onrender.com/forgot-password", {
+      const response = await fetch("http://127.0.0.1:9123/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -28,12 +27,11 @@ const ForgotPassword = () => {
 
       if (response.ok) {
         setMessage(`Password reset link sent to your email: ${email}`);
-
-        // ✅ Use reset_link from API response
         if (data.reset_link) {
-          setResetLink(data.reset_link);
-        } else {
-          setError("Token not received. Please check your email.");
+          const token = new URL(data.reset_link).searchParams.get("token");
+          if (token) {
+            setResetToken(token);
+          }
         }
       } else {
         setError(data.detail || "Failed to send reset link.");
@@ -62,20 +60,20 @@ const ForgotPassword = () => {
         </button>
       </form>
 
-      {/* ✅ Show Success/Error Messages */}
       {message && <p className="success">{message}</p>}
-      {resetLink && <p className="or-text">OR</p>}
-      {resetLink && (
+      {resetToken && <p className="or-text">OR</p>}
+      
+      {/* ✅ Replace Button with Clickable Text */}
+      {resetToken && (
         <p className="success">
           Click here to reset your password:{" "}
-          <a href={resetLink} target="_blank" rel="noopener noreferrer">
+          <Link to={`/reset-password?token=${resetToken}`} className="reset-link">
             Reset Password
-          </a>
+          </Link>
         </p>
-      )}
+      )}     
       {error && <p className="error">{error}</p>}
 
-      {/* ✅ Home Button */}
       <Link to="/login" className="home-button">
         <FaHome /> Home
       </Link>

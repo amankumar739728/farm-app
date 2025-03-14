@@ -5,23 +5,19 @@ body {
   padding: 0;
   background-color: #f9f9f9;
 }
-
 .dashboard-container {
   max-width: 800px; /* Increased width for more content */
   margin: 0 auto;
   padding: 20px;
-  border: 1px solid #ccc;
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   background: linear-gradient(135deg, #f9f9f9, #e6e6e6);
   transition: all 0.3s ease;
 }
-
 .dashboard-container.dark-mode {
   background: linear-gradient(135deg, #333, #444);
   color: #fff;
 }
-
 /* Header Styles */
 .header {
   display: flex;
@@ -29,29 +25,24 @@ body {
   align-items: center;
   margin-bottom: 20px;
 }
-
 .header h1 {
   font-size: 24px;
   font-weight: 600;
   color: #333;
 }
-
 .dashboard-container.dark-mode .header h1 {
   color: #fff;
 }
-
 /* Content Styles */
 .content {
   display: flex;
   flex-direction: column;
   gap: 20px; /* Increased gap for better spacing */
 }
-
 /* Input Field Styles */
 input[type="text"],
 input[type="number"] {
   padding: 12px;
-  border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 16px;
   width: 100%; /* Full width of the container */
@@ -60,20 +51,17 @@ input[type="number"] {
   transition: all 0.3s ease;
   box-sizing: border-box; /* Ensure padding and border are included in the width */
 }
-
 input[type="text"]:focus,
 input[type="number"]:focus {
   border-color: #007bff;
   outline: none;
   box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
 }
-
 /* Button Styles */
 .details-button {
   padding: 12px 24px;
   background-color: #007bff;
   color: white;
-  border: none;
   border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
@@ -83,17 +71,14 @@ input[type="number"]:focus {
   transition: all 0.3s ease;
   height: 48px; /* Match input field height */
 }
-
 .details-button:hover {
   background-color: #0056b3;
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
-
 .details-button:active {
   transform: translateY(0);
 }
-
 /* Loading Spinner */
 .loading-spinner {
   display: flex;
@@ -102,28 +87,24 @@ input[type="number"]:focus {
   font-size: 18px;
   color: #007bff;
 }
-
 /* Response Card */
 .response-card {
   background-color: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 1.9);
   margin-top: 20px;
   animation: fadeIn 0.5s ease;
 }
-
 .dashboard-container.dark-mode .response-card {
   background-color: #444;
   color: #fff;
 }
-
 pre {
   font-family: 'Courier New', Courier, monospace;
   font-size: 14px;
   white-space: pre-wrap; /* Ensure long text wraps */
 }
-
 /* Footer Styles */
 .dashboard-footer {
   text-align: center;
@@ -132,122 +113,55 @@ pre {
   border-top: 1px solid #ccc;
   color: #666;
 }
-
 .dashboard-container.dark-mode .dashboard-footer {
   color: #aaa;
 }
-
 /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .dashboard-container {
     padding: 15px;
   }
-
   .header h1 {
     font-size: 20px;
   }
-
   input[type="text"],
   input[type="number"] {
     font-size: 14px; /* Smaller font size for mobile */
     padding: 10px; /* Smaller padding for mobile */
     height: 40px; /* Smaller height for mobile */
   }
-
   .details-button {
     font-size: 14px; /* Smaller font size for mobile */
     height: 40px; /* Smaller height for mobile */
   }
 }
-
-
 /* Navbar Styles */
 .navbar {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
-
 .nav-button {
   padding: 10px 20px;
   background-color: #007bff;
   color: white;
-  border: none;
   border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
   transition: all 0.3s ease;
 }
-
 .nav-button:hover {
   background-color: #0056b3;
 }
-
 .nav-button.active {
   background-color: #004080;
 }
-
 /* Default Landing Page Styles */
-/* .default-landing {
-  text-align: center;
-  padding: 40px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  animation: fadeIn 0.5s ease;
-}
-
-.default-landing h2 {
-  font-size: 24px;
-  margin-bottom: 10px;
-  color: #333;
-}
-
-.default-landing p {
-  font-size: 16px;
-  color: #666;
-}
-
-.dashboard-container.dark-mode .default-landing {
-  background-color: #444;
-  color: #fff;
-}
-
-.dashboard-container.dark-mode .default-landing h2 {
-  color: #fff;
-}
-
-.dashboard-container.dark-mode .default-landing p {
-  color: #ddd;
-} */
-
-/* Back to Dashboard Button */
-.back-button {
-  padding: 10px 20px;
-  background-color: #6c757d; /* Gray color */
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  transition: all 0.3s ease;
-}
-
-.back-button:hover {
-  background-color: #5a6268; /* Darker gray */
-}
-
-/* Default Landing Page */
 .default-landing {
   text-align: center;
   padding: 40px;
@@ -263,50 +177,42 @@ pre {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  border: 2px solid lightgreen;
 }
-
 .default-landing h2 {
   font-size: 24px;
   margin-bottom: 10px;
   color: #000;
 }
-
 .default-landing p {
   font-size: 16px;
   color: #000;
 }
-
 .dashboard-container.dark-mode .default-landing {
   background-color: rgba(0, 0, 0, 0.8);
   color: #fff;
 }
-
 .dashboard-container.dark-mode .default-landing h2 {
   color: #fff;
 }
-
 .dashboard-container.dark-mode .default-landing p {
   color: #ddd;
 }
-
 .dashboard-container.dark-mode h2,
 .dashboard-container.dark-mode h3 {
   color: #fff !important; /* Override any other styles */
   margin-top: -8px;
 }
-
 /* Container Styling */
 .endpoint-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   text-align: left;
   gap: 15px;
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
 }
-
 /* Form Layout */
 .endpoint-container form {
   display: flex;
@@ -315,18 +221,15 @@ pre {
   align-items: flex-start; /* Align form fields to the left */
   width: 100%;
 }
-
 /* Input Styling */
 .endpoint-container input {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 16px;
   box-sizing: border-box;
   margin-top: -10px;
 }
-
 /* Button Container: Align Buttons to the Right */
 .button-container {
   display: flex;
@@ -335,7 +238,6 @@ pre {
   gap: 10px;
   margin-top: 10px;
 }
-
 /* Button Styling */
 .details-button,
 .back-button {
@@ -345,34 +247,28 @@ pre {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: none;
   border-radius: 8px;
   cursor: pointer;
 }
-
 .details-button {
   background-color: #007bff;
   color: white;
   margin-top: -10px;
 }
-
 .details-button:hover {
   background-color: #0056b3;
 }
-
 .back-button {
   background-color: #6c757d;
   color: white;
   margin-top: -3px;
 }
-
 .back-button:hover {
-  background-color: #5a6268;
+  background-color: #0056b3;
 }
-
 /* Response Section */
 .response-card {
-  width: 100%;
+  width: 92%;
   text-align: left;
   padding: 15px;
   border-radius: 8px;
@@ -380,10 +276,48 @@ pre {
   margin-top: 10px;
   background-color: white;
 }
-
 /* Dark Mode Support */
 .dashboard-container.dark-mode .response-card {
   background-color: #444;
   color: #fff;
 }
 
+.details-button,
+.back-button {
+  padding: 12px 16px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  height: 48px; 
+  width: 100%;  
+  max-width: 200px; 
+  margin: 0; /* Ensure no extra margin */
+}
+
+.details-button {
+  background-color: #007bff;
+  color: white;
+}
+.details-button:hover {
+  background-color: #0056b3;
+}
+.back-button {
+  background-color: #007bff;
+  color: white;
+}
+.back-button:hover {
+  background-color: #0056b3;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center; /* Align buttons horizontally */
+  align-items: center; /* Ensure vertical alignment */
+  width: 100%;
+  gap: 10px;
+  margin-top: 10px; /* Ensure consistent margin */
+}

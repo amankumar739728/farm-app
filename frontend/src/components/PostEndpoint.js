@@ -29,6 +29,7 @@ const PostEndpoint = ({
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter name"
           required
+          onKeyDown={(e) => e.key === "Enter" && handleSubmit(e)}
         />
         <input
           type="number"
@@ -36,6 +37,7 @@ const PostEndpoint = ({
           onChange={(e) => setAge(e.target.value)}
           placeholder="Enter age"
           required
+          onKeyDown={(e) => e.key === "Enter" && handleSubmit(e)}
         />
         <input
           type="text"
@@ -43,6 +45,7 @@ const PostEndpoint = ({
           onChange={(e) => setCity(e.target.value)}
           placeholder="Enter city"
           required
+          onKeyDown={(e) => e.key === "Enter" && handleSubmit(e)}
         />
       </form>
 
