@@ -2,7 +2,6 @@ import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 // import api from "../api/api";
 import { ThemeContext } from "../context/ThemeContext";
-// import 
 import "./Auction.css";
 import { FaHome, FaSearch, FaTimes } from "react-icons/fa";
 import Select from "react-select"; // Import react-select
@@ -14,6 +13,8 @@ const Auction = () => {
   const [activeTab, setActiveTab] = useState("createTeam");
   const [teamName, setTeamName] = useState("");
   const [teamOwner, setTeamOwner] = useState("");
+  const [teamLogo, setTeamLogo] = useState("");
+
   const [playerName, setPlayerName] = useState("");
   const [employeeId, setEmployeeId] = useState("");
   const [pointsSpent, setPointsSpent] = useState("");
@@ -51,8 +52,8 @@ const Auction = () => {
   };
 
   const handleCreateTeam = async () => {
-    if (!teamName || !teamOwner) {
-      alert("Please fill all fields: team name and team owner");
+    if (!teamName || !teamOwner || !teamLogo) {
+      alert("Please fill all fields: team name and team owner and team logo");
       return;
     }
 
@@ -62,10 +63,13 @@ const Auction = () => {
 
         team_name: teamName,
         team_owner: teamOwner,
+        team_logo: teamLogo,
+
       });
       alert(response.data.message);
       setTeamName("");
       setTeamOwner("");
+      setTeamLogo("");
     } catch (err) {
       console.error("❌ API Error:", err.response?.data || err.message);
     } finally {
@@ -256,6 +260,13 @@ const Auction = () => {
                 placeholder="Team Owner"
                 value={teamOwner}
                 onChange={(e) => setTeamOwner(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleCreateTeam()}
+              />
+              <input
+                type="text"
+                placeholder="Team Logo URL"
+                value={teamLogo}
+                onChange={(e) => setTeamLogo(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreateTeam()}
               />
               <button onClick={handleCreateTeam} disabled={isLoading}>
