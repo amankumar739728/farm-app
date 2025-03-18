@@ -48,7 +48,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("https://farm-app-t7hi.onrender.com/login", {
+      const response = await fetch("http://localhost:9123/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -62,7 +62,7 @@ const Login = () => {
         const data = await response.json();
         if (data.message === "OTP sent successfully") {
           setIsOtpSent(true); // Set OTP sent state
-          setPassword(""); // Clear password field
+          setPassword(password); // save the password for resend otp
           setIsLoading(false);
           return; // Exit early to wait for OTP
         }
@@ -93,12 +93,12 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("https://farm-app-t7hi.onrender.com/login", {
+      const response = await fetch("http://localhost:9123/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: usernameOrEmail,
-          password,
+          password, // Ensure the password is sent
         }),
       });
 
