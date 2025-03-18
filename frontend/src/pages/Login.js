@@ -11,6 +11,8 @@ const Login = () => {
   const [usernameOrEmail, setUsernameOrEmail] = useState(""); // Allow username or email
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [otp, setOtp] = useState(""); // New state for OTP
+  const [isOtpSent, setIsOtpSent] = useState(false); // Track if OTP is sent
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
@@ -32,7 +34,8 @@ const Login = () => {
   const validateForm = () => {
     const newErrors = {};
     if (!usernameOrEmail) newErrors.usernameOrEmail = "Username or Email is required";
-    if (!password) newErrors.password = "Password is required";
+    if (!password && !isOtpSent) newErrors.password = "Password is required";
+    if (isOtpSent && !otp) newErrors.otp = "OTP is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -48,13 +51,24 @@ const Login = () => {
       const response = await fetch("https://farm-app-t7hi.onrender.com/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: usernameOrEmail, password }), // Send either username or email
+        body: JSON.stringify({
+          username: usernameOrEmail,
+          password: isOtpSent ? undefined : password,
+          otp: isOtpSent ? otp : undefined,
+        }),
       });
 
       if (response.ok) {
         const data = await response.json();
+        if (data.message === "OTP sent successfully") {
+          setIsOtpSent(true); // Set OTP sent state
+          setPassword(""); // Clear password field
+          setIsLoading(false);
+          return; // Exit early to wait for OTP
+        }
+
         login(data);
-        
+
         // Save username/email if "Remember Me" is checked
         if (rememberMe) {
           localStorage.setItem("rememberedUsernameOrEmail", usernameOrEmail);
@@ -64,10 +78,41 @@ const Login = () => {
 
         navigate("/dashboard");
       } else {
-        alert("Login failed! Please check your username/email and password.");
+        const errorData = await response.json();
+        alert(errorData.detail || "Login failed! Please check your username/email and password.");
       }
     } catch (error) {
       alert("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle OTP resend
+  const handleResendOtp = async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("https://farm-app-t7hi.onrender.com/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: usernameOrEmail,
+          password,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.message === "OTP sent successfully") {
+          alert("OTP resent successfully");
+        }
+      } else {
+        const errorData = await response.json();
+        alert(errorData.detail || "Failed to resend OTP. Please try again.");
+      }
+    } catch (error) {
+      alert("An error occurred while resending OTP. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +135,7 @@ const Login = () => {
           <div className="bar bottom"></div>
           <div className="bar left"></div>
         </div>
-        
+
         {/* Centered Logo */}
         <div className="login-logo">
           <img
@@ -116,20 +161,36 @@ const Login = () => {
         </div>
 
         {/* Password Field */}
-        <div className="input-group password-input-container">
-          <input
-            type={showPassword ? "text" : "password"}
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            required
-          />
-          <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
-            {showPassword ? <EyeOff /> : <Eye />}
-          </span>
-          {errors.password && <span className="error">{errors.password}</span>}
-        </div>
+        {!isOtpSent && (
+          <div className="input-group password-input-container">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              required={!isOtpSent}
+            />
+            <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
+              {showPassword ? <EyeOff /> : <Eye />}
+            </span>
+            {errors.password && <span className="error">{errors.password}</span>}
+          </div>
+        )}
+
+        {/* OTP Field */}
+        {isOtpSent && (
+          <div className="input-group">
+            <input
+              type="text"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              required
+            />
+            {errors.otp && <span className="error">{errors.otp}</span>}
+          </div>
+        )}
 
         {/* Remember Me & Forgot Password */}
         <div className="remember-container">
@@ -141,14 +202,21 @@ const Login = () => {
               onChange={(e) => setRememberMe(e.target.checked)}
             />
             <label htmlFor="rememberMe">Remember me</label>
-          </div>      
+          </div>
           <a href="/forgot-password" className="forgot-password">Forgot Password?</a>
         </div>
 
         {/* Login Button */}
-        <button type="submit" disabled={isLoading}>
+        <button type="submit" disabled={isLoading || (isOtpSent && !otp)}>
           {isLoading ? "Logging in..." : "Log in to your account"}
         </button>
+
+        {/* Resend OTP Button */}
+        {isOtpSent && (
+          <button type="button" onClick={handleResendOtp} disabled={isLoading}>
+            {isLoading ? "Resending OTP..." : "Resend OTP"}
+          </button>
+        )}
 
         {/* Footer */}
         <div className="login-footer">

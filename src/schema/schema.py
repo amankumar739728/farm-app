@@ -4,14 +4,25 @@ from typing import List,Optional
 class AuthRequest(BaseModel):
     username: str
     
+# class LoginUser(BaseModel):
+#     username: str
+#     password: str
+
+
 class LoginUser(BaseModel):
-    username: str
-    password: str
+    username: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    password: Optional[str] = None
+    otp: Optional[str] = None
     
 class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str
+    
+class OTPResponse(BaseModel):
+    message: str
 
 class SampleResponse(BaseModel):
     message: str

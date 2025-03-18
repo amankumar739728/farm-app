@@ -33,6 +33,8 @@ class User(Document):
     location: str
     username: str
     password: str
+    otp: Optional[str] = None  # Store the OTP
+    otp_expiry: Optional[datetime] = None  # Store the OTP expiry time
     
     class Settings:
         name = "users"
