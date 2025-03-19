@@ -92,7 +92,7 @@
 .toggle-password {
   position: absolute;
   right: 12px;
-  top: 50%;
+  top: 40%;
   transform: translateY(-50%);
   cursor: pointer;
   color: #007bff;
@@ -143,7 +143,7 @@
   border: none;
   cursor: pointer;
   transition: 0.3s ease-in-out;
-  margin-top: 10px;
+  margin-top: 0px;
   margin-bottom: 5px;
 }
 
@@ -204,7 +204,7 @@
 /* Form container */
 .login-container form {
   width: 100%;
-  max-width: 450px;
+  max-width: 400px;
   padding: 20px;
   box-sizing: border-box;
   background-color: rgba(255, 255, 255, 0.9);
@@ -374,6 +374,7 @@
   gap: 5px; /* Space between checkbox and label */
   font-size: 14px;
   font-weight: bold;
+  margin-top: -20px
 }
 
 /* Ensure checkbox and text align */
@@ -409,4 +410,134 @@
 /* Hover effect */
 .login-footer a:hover {
   text-decoration: underline;
+}
+
+
+.input-group {
+  margin-bottom: 10px;
+  width: 100%;
+  position: relative;
+  margin-top: -14px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.input-group .error {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.auth-method-selection {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px; /* Add gap between buttons */
+  margin-bottom: 20px;
+}
+
+.auth-method {
+  flex: 1; /* Equal width for both buttons */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+  margin-top: -15px;
+  /* margin-bottom: 7px; */
+  margin-bottom: -1px;
+  border: 1px solid #007bff; /* Add border for better visibility */
+}
+
+.auth-method.selected {
+  background-color:darkcyan;
+  border-color: #007bff; /* Match border color */
+}
+
+.auth-method .auth-icon {
+  margin-right: 8px;
+}
+
+/* Resend OTP Button */
+.resend-otp-button {
+  width: 100%;
+  max-width: 400px;
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 8px;
+  background-color: #28a745; /* Green color */
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+.resend-otp-button:hover {
+  background-color: #218838; /* Darker green on hover */
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
+/* Default Login Button */
+.login-button {
+  width: 100%;
+  max-width: 400px;
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 8px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  margin-top: 10px; /* Default margin */
+  margin-bottom: 5px;
+}
+
+
+/* Sign-in Option Text */
+.sign-in-option {
+  font-size: 16px;
+  font-weight: bold;
+  color: #007bff;
+  cursor: pointer;
+  margin-top: -15px;
+  margin-bottom: 22px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.sign-in-option:hover {
+  color: #0056b3;
+}
+
+/* Auth Method Selection (Hidden by Default) */
+.auth-method-selection {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Show Auth Method Selection when showAuthOptions is true */
+.show-auth-options .auth-method-selection {
+  display: flex; /* Show when toggled */
+}
+
+.success-message {
+  color: green;
+  background-color: #e6ffe6;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  text-align: center;
+  font-weight: bold;
 }

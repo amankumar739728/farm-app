@@ -1,4 +1,4 @@
-import { Eye, EyeOff } from "lucide-react"; // Import eye icons
+import { Eye, EyeOff, Lock, Key } from "lucide-react"; // Import eye and lock icons
 import { useState, useContext, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -10,12 +10,15 @@ import darkLogo from "../assets/company-logo-dark.png";
 const Login = () => {
   const [usernameOrEmail, setUsernameOrEmail] = useState(""); // Allow username or email
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const [otp, setOtp] = useState(""); // New state for OTP
   const [isOtpSent, setIsOtpSent] = useState(false); // Track if OTP is sent
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [authMethod, setAuthMethod] = useState(null); // No default method initially
   const [errors, setErrors] = useState({});
+  const [rememberMe, setRememberMe] = useState(false); // Initialize rememberMe state
+  const [showAuthOptions, setShowAuthOptions] = useState(false); // New state to control visibility
+  const [successMessage, setSuccessMessage] = useState(""); // New state for success message
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -30,14 +33,59 @@ const Login = () => {
     }
   }, []);
 
+  // Clear success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000); // Clear message after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
   // Form validation
   const validateForm = () => {
     const newErrors = {};
     if (!usernameOrEmail) newErrors.usernameOrEmail = "Username or Email is required";
-    if (!password && !isOtpSent) newErrors.password = "Password is required";
-    if (isOtpSent && !otp) newErrors.otp = "OTP is required";
+    if (authMethod === "password" && !password) newErrors.password = "Password is required";
+    if (authMethod === "otp" && !otp && isOtpSent) newErrors.otp = "OTP is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  // Handle OTP sending
+  const handleSendOtp = async () => {
+    if (!usernameOrEmail) {
+      setErrors({ usernameOrEmail: "Username or Email is required" });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("https://farm-app-t7hi.onrender.com/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: usernameOrEmail,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.message === "OTP sent successfully") {
+          setIsOtpSent(true); // Enable OTP input field
+          setSuccessMessage("✅ OTP sent successfully!"); // Set success message
+        }
+      } else {
+        const errorData = await response.json();
+        setErrors({ server: errorData.detail || "Failed to send OTP. Please try again." });
+      }
+    } catch (error) {
+      setErrors({ server: "An error occurred. Please try again." });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Handle form submission
@@ -53,8 +101,8 @@ const Login = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: usernameOrEmail,
-          password: isOtpSent ? undefined : password,
-          otp: isOtpSent ? otp : undefined,
+          password: authMethod === "password" ? password : undefined,
+          otp: authMethod === "otp" ? otp : undefined,
         }),
       });
 
@@ -62,7 +110,7 @@ const Login = () => {
         const data = await response.json();
         if (data.message === "OTP sent successfully") {
           setIsOtpSent(true); // Set OTP sent state
-          setPassword(password); // save the password for resend otp
+          setPassword(""); // Clear password field
           setIsLoading(false);
           return; // Exit early to wait for OTP
         }
@@ -76,13 +124,14 @@ const Login = () => {
           localStorage.removeItem("rememberedUsernameOrEmail");
         }
 
-        navigate("/dashboard");
+        setSuccessMessage("✅ Login successful! Redirecting to dashboard..."); // Set success message
+        setTimeout(() => navigate("/dashboard"), 3000); // Redirect after 3 seconds
       } else {
         const errorData = await response.json();
-        alert(errorData.detail || "Login failed! Please check your username/email and password.");
+        setErrors({ server: errorData.detail || "Login failed! Please check your username/email and password." });
       }
     } catch (error) {
-      alert("An error occurred. Please try again.");
+      setErrors({ server: "An error occurred. Please try again." });
     } finally {
       setIsLoading(false);
     }
@@ -98,21 +147,21 @@ const Login = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: usernameOrEmail,
-          password, // Ensure the password is sent
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
         if (data.message === "OTP sent successfully") {
-          alert("OTP resent successfully");
+          setSuccessMessage("✅ OTP resent successfully!"); // Set success message
+          setIsOtpSent(true); // Ensure OTP sent state is set
         }
       } else {
         const errorData = await response.json();
-        alert(errorData.detail || "Failed to resend OTP. Please try again.");
+        setErrors({ server: errorData.detail || "Failed to resend OTP. Please try again." });
       }
     } catch (error) {
-      alert("An error occurred while resending OTP. Please try again.");
+      setErrors({ server: "An error occurred while resending OTP. Please try again." });
     } finally {
       setIsLoading(false);
     }
@@ -147,6 +196,13 @@ const Login = () => {
 
         <h2>Login Page</h2>
 
+        {/* Success Message */}
+        {successMessage && (
+          <div className="success-message">
+            {successMessage}
+          </div>
+        )}
+
         {/* Username or Email Field */}
         <div className="input-group">
           <input
@@ -160,59 +216,102 @@ const Login = () => {
           {errors.usernameOrEmail && <span className="error">{errors.usernameOrEmail}</span>}
         </div>
 
-        {/* Password Field */}
-        {!isOtpSent && (
-          <div className="input-group password-input-container">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              required={!isOtpSent}
-            />
-            <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
-              {showPassword ? <EyeOff /> : <Eye />}
-            </span>
-            {errors.password && <span className="error">{errors.password}</span>}
-          </div>
-        )}
-
-        {/* OTP Field */}
-        {isOtpSent && (
+        {/* Password or OTP Field (Conditional Rendering) */}
+        {authMethod && (
           <div className="input-group">
-            <input
-              type="text"
-              placeholder="Enter OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              required
-            />
-            {errors.otp && <span className="error">{errors.otp}</span>}
+            {authMethod === "password" ? (
+              <div className="password-input-container">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  required
+                />
+                <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </span>
+                {errors.password && <span className="error">{errors.password}</span>}
+              </div>
+            ) : (
+              <>
+                {!isOtpSent && (
+                  <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    disabled={isLoading || !usernameOrEmail}
+                  >
+                    {isLoading ? "Sending OTP..." : "Send OTP"}
+                  </button>
+                )}
+                {isOtpSent && (
+                  <input
+                    type="text"
+                    placeholder="Enter OTP"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    required
+                  />
+                )}
+              </>
+            )}
           </div>
         )}
 
-        {/* Remember Me & Forgot Password */}
-        <div className="remember-container">
-          <div className="remember-me">
-            <input
-              type="checkbox"
-              id="rememberMe"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-            />
-            <label htmlFor="rememberMe">Remember me</label>
-          </div>
-          <a href="/forgot-password" className="forgot-password">Forgot Password?</a>
+        {/* Sign-in Option Text */}
+        <div className="sign-in-option" onClick={() => setShowAuthOptions(!showAuthOptions)}>
+          Sign-in Option
         </div>
 
+        {/* Auth Method Selection (Conditional Rendering) */}
+        {showAuthOptions && (
+          <div className="auth-method-selection">
+            <span
+              className={`auth-method ${authMethod === "password" ? "selected" : ""}`}
+              onClick={() => setAuthMethod("password")}
+            >
+              <Key className="auth-icon" /> Password
+            </span>
+            <span
+              className={`auth-method ${authMethod === "otp" ? "selected" : ""}`}
+              onClick={() => setAuthMethod("otp")}
+            >
+              <Lock className="auth-icon" /> OTP
+            </span>
+          </div>
+        )}
+
+        {/* Remember Me & Forgot Password (Conditional Rendering) */}
+        {authMethod === "password" && (
+          <div className="remember-container">
+            <div className="remember-me">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              <label htmlFor="rememberMe">Remember me</label>
+            </div>
+            <a href="/forgot-password" className="forgot-password" style={{ marginTop: "-20px" }}>Forgot Password?</a>
+          </div>
+        )}
+
         {/* Login Button */}
-        <button type="submit" disabled={isLoading || (isOtpSent && !otp)}>
+        <button
+          type="submit"
+          disabled={isLoading || (authMethod === "otp" && !otp)}
+          style={{
+            marginTop: authMethod === "otp" ? "-10px" : "10px", // Adjust margin dynamically
+          }}
+          className="login-button" // Apply default button styles
+        >
           {isLoading ? "Logging in..." : "Log in to your account"}
         </button>
 
         {/* Resend OTP Button */}
-        {isOtpSent && (
+        {authMethod === "otp" && isOtpSent && (
           <button type="button" onClick={handleResendOtp} disabled={isLoading}>
             {isLoading ? "Resending OTP..." : "Resend OTP"}
           </button>

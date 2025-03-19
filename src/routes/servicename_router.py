@@ -30,11 +30,18 @@ import secrets
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from services.servicename import generate_otp,send_otp_email
 from typing import Union
+import logging
+
+
 
 
 
 router = APIRouter(route_class=CustomRoute)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 # In-memory storage for reset tokens (for simplicity, use Redis or DB in production)
@@ -232,48 +239,96 @@ fake_users_db = {
 
 
 
+# @app.post("/login", response_model=Union[Token, OTPResponse])
+# async def login(request: Request, payload: LoginUser):
+#     # Validate input
+#     if not (payload.username or payload.email):
+#         raise HTTPException(status_code=400, detail="Username or email is required")
+
+#     # Password-based login
+#     if payload.password:
+#         # Determine if input is an email or username
+#         query_filter = {"email": payload.username} if "@" in payload.username else {"username": payload.username}
+
+#         # Fetch user from MongoDB
+#         stored_user = await User.find_one(query_filter)
+#         if not stored_user:
+#             raise HTTPException(status_code=401, detail="Invalid username/email or password")
+
+#         # Verify password
+#         if not verify_password(payload.password, stored_user.password):
+#             raise HTTPException(status_code=401, detail="Invalid username/email or password")
+
+#         # Generate and send OTP
+#         otp = await generate_otp()
+#         otp_expiry = datetime.datetime.now() + timedelta(minutes=5)  # OTP valid for 5 minutes
+
+#         # Update user with OTP and expiry time
+#         await User.find_one(query_filter).update({"$set": {"otp": otp, "otp_expiry": otp_expiry}})
+
+#         # Send OTP via email
+#         await send_otp_email(payload.username if "@" in payload.username else stored_user.email, otp)
+
+#         return {"message": "OTP sent successfully"}
+
+#     # OTP-based login
+#     elif payload.otp:
+#         # Determine if input is an email or username
+#         query_filter = {"email": payload.username} if "@" in payload.username else {"username": payload.username}
+
+#         # Fetch user from MongoDB
+#         stored_user = await User.find_one(query_filter)
+#         if not stored_user:
+#             raise HTTPException(status_code=404, detail="User not found")
+
+#         # Verify OTP
+#         if not stored_user.otp or stored_user.otp != payload.otp or stored_user.otp_expiry < datetime.datetime.now():
+#             raise HTTPException(status_code=401, detail="Invalid or expired OTP or Already Used OTP")
+
+#         # Clear OTP fields after successful verification
+#         await User.find_one(query_filter).update({"$set": {"otp": None, "otp_expiry": None}})
+
+#         # Generate JWT tokens
+#         access_token = create_access_token(data={"sub": stored_user.username})
+#         refresh_token = create_refresh_token(data={"sub": stored_user.username})
+
+#         return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+
+#     else:
+#         raise HTTPException(status_code=400, detail="Invalid login request")
+
+
+
+
+
 @app.post("/login", response_model=Union[Token, OTPResponse])
 async def login(request: Request, payload: LoginUser):
     # Validate input
     if not (payload.username or payload.email):
         raise HTTPException(status_code=400, detail="Username or email is required")
 
+    # Determine if input is an email or username
+    query_filter = {"email": payload.username} if "@" in payload.username else {"username": payload.username}
+
+    # Fetch user from MongoDB
+    stored_user = await User.find_one(query_filter)
+    if not stored_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     # Password-based login
     if payload.password:
-        # Determine if input is an email or username
-        query_filter = {"email": payload.username} if "@" in payload.username else {"username": payload.username}
-
-        # Fetch user from MongoDB
-        stored_user = await User.find_one(query_filter)
-        if not stored_user:
-            raise HTTPException(status_code=401, detail="Invalid username/email or password")
-
         # Verify password
         if not verify_password(payload.password, stored_user.password):
             raise HTTPException(status_code=401, detail="Invalid username/email or password")
 
-        # Generate and send OTP
-        otp = await generate_otp()
-        otp_expiry = datetime.datetime.now() + timedelta(minutes=5)  # OTP valid for 5 minutes
+        # Generate JWT tokens
+        access_token = create_access_token(data={"sub": stored_user.username})
+        refresh_token = create_refresh_token(data={"sub": stored_user.username})
 
-        # Update user with OTP and expiry time
-        await User.find_one(query_filter).update({"$set": {"otp": otp, "otp_expiry": otp_expiry}})
-
-        # Send OTP via email
-        await send_otp_email(payload.username if "@" in payload.username else stored_user.email, otp)
-
-        return {"message": "OTP sent successfully"}
+        return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
     # OTP-based login
     elif payload.otp:
-        # Determine if input is an email or username
-        query_filter = {"email": payload.username} if "@" in payload.username else {"username": payload.username}
-
-        # Fetch user from MongoDB
-        stored_user = await User.find_one(query_filter)
-        if not stored_user:
-            raise HTTPException(status_code=404, detail="User not found")
-
         # Verify OTP
         if not stored_user.otp or stored_user.otp != payload.otp or stored_user.otp_expiry < datetime.datetime.now():
             raise HTTPException(status_code=401, detail="Invalid or expired OTP or Already Used OTP")
@@ -287,8 +342,19 @@ async def login(request: Request, payload: LoginUser):
 
         return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
+    # Request for OTP
     else:
-        raise HTTPException(status_code=400, detail="Invalid login request")
+        # Generate and send OTP
+        otp = await generate_otp()
+        otp_expiry = datetime.datetime.now() + timedelta(minutes=5)  # OTP valid for 5 minutes
+
+        # Update user with OTP and expiry time
+        await User.find_one(query_filter).update({"$set": {"otp": otp, "otp_expiry": otp_expiry}})
+
+        # Send OTP via email
+        await send_otp_email(stored_user.email, otp)
+
+        return {"message": "OTP sent successfully"}
 
 @router.post("/refresh-token", response_model=TokenRefreshResponse)
 async def refresh_token(request: TokenRefreshRequest):
@@ -376,7 +442,6 @@ async def signup(user: User):
 @router.post("/forgot-password")
 async def forgot_password(request: ForgotPasswordRequest, background_tasks: BackgroundTasks):
     """Step 1: User requests a password reset."""
-    
     user = await User.find_one({"email": request.email})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -404,6 +469,8 @@ async def forgot_password(request: ForgotPasswordRequest, background_tasks: Back
 @router.post("/reset-password")
 async def reset_password(request: ResetPasswordRequest):
     """Step 2: User submits new password with token."""
+    print("Reset password request received.")
+
     
     # Find the token in MongoDB
     token_entry = await ResetToken.find_one({"token": request.token})
@@ -421,7 +488,15 @@ async def reset_password(request: ResetPasswordRequest):
     user.password = hashed_password
     await user.save()
 
-    # Delete the used token
-    await token_entry.delete()
+    # Log the token entry before deletion
+    print(f"Token entry before deletion: {token_entry}")
+
+    try:
+        # Delete the used token
+        await token_entry.delete()
+        print("Token entry deleted successfully.")
+    except Exception as e:
+        print(f"Error deleting token entry: {str(e)}")
+
 
     return {"message": "Password has been reset successfully"}
