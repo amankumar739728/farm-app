@@ -291,6 +291,26 @@ h2 {
   border-color: #66b3ff;
 }
 
+@media (max-width: 768px) {
+  button, 
+  input {
+      font-size: 14px;
+      margin-top: 2px;
+  }
+
+  /* Example: Improve button touch area */
+  button {
+      padding: 10px 15px;  /* Increases touch area */
+      width: 100%;         /* Full-width for mobile */
+  }
+
+  /* Example: Improve input spacing */
+  input {
+      width: 100%;  
+      padding: 8px; /* Better touch experience */
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .auction-content {
