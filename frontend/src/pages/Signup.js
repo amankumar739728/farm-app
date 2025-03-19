@@ -63,7 +63,7 @@ const Signup = () => {
   return (
     <div className="signup-container">
       <form onSubmit={handleSubmit}>
-        <h2>Signup</h2>
+        <h2 className="signup-heading">Signup</h2>
 
         {Object.entries(formData).map(([key, value]) => (
           <div className="input-group" key={key}>
@@ -79,11 +79,11 @@ const Signup = () => {
         ))}
 
         <button type="submit" disabled={isLoading}>
-          {isLoading ? "Signing up..." : "Sign Up"}
+          {isLoading ? "Signing up..." : "Register"}
         </button>
 
         <div className="login-link">
-          Already have an account? <a href="/login">Login</a>
+          Already have an account? <a href="/login">Sign In</a>
         </div>
       </form>
     </div>
