@@ -347,6 +347,7 @@
 .login-container {
   position: relative;
   padding: 50px;
+  overflow: hidden; /* Prevent overflow */
 }
 
 .login-container form {
@@ -540,4 +541,24 @@
   margin-bottom: 10px;
   text-align: center;
   font-weight: bold;
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 375px) {
+  .login-container button {
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  .login-container form {
+    padding: 10px;
+  }
+
+  .login-container h2 {
+    font-size: 22px;
+  }
+
+  .login-container {
+    padding-top: 3vh;
+  }
 }
