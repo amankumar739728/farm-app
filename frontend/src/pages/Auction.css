@@ -634,7 +634,7 @@ h2 {
   text-align: left;
   padding: 1px; /* Add some padding for better UI */
   border-radius: 5px;
-  margin-bottom: 1px;
+  margin-bottom: 15px;
 }
 
 /* Ensure the Select component's container takes full width */
