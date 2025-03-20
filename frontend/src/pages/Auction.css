@@ -357,6 +357,7 @@ h2 {
   width: 100%;
   display: flex;
   align-items: center;
+  margin-bottom: 15px;
 }
 
 /* Input Field */
