@@ -184,6 +184,7 @@
   font-weight: bold;
   color: #007bff;
   opacity: 1; /* Ensures visibility */
+  margin-top: 10px;
 }
 
 /* Change color on hover */

@@ -21,7 +21,7 @@ const PostEndpoint = ({
 
   return (
     <div className="endpoint-container">
-      <h2>POST Endpoint</h2>
+      <h2 style={{ textAlign: "center" }}>POST Endpoint</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"

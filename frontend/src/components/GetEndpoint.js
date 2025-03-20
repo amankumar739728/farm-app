@@ -13,7 +13,7 @@ const GetEndpoint = ({ isLoading, handleDetailsClick, sampleResponse, onBackToDa
 
   return (
     <div className="endpoint-container">
-      <h2>GET Endpoint</h2>
+      <h2 style={{ textAlign: "center" }}>GET Endpoint</h2>
       
       {/* Input Field */}
       <input
