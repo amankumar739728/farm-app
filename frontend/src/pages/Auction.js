@@ -1,13 +1,10 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// import api from "../api/api";
 import { ThemeContext } from "../context/ThemeContext";
 import "./Auction.css";
 import { FaHome, FaSearch, FaTimes } from "react-icons/fa";
-import Select from "react-select"; // Import react-select
-import apiWrapper from "../api/apiWrapper"; // Import the API wrapper
-
-
+import Select from "react-select";
+import apiWrapper from "../api/apiWrapper";
 
 const Auction = () => {
   const [activeTab, setActiveTab] = useState("createTeam");
@@ -18,7 +15,7 @@ const Auction = () => {
   const [playerName, setPlayerName] = useState("");
   const [employeeId, setEmployeeId] = useState("");
   const [pointsSpent, setPointsSpent] = useState("");
-  const [selectedTeam, setSelectedTeam] = useState(null); // Change to null for react-select
+  const [selectedTeam, setSelectedTeam] = useState(null);
   const [teams, setTeams] = useState([]);
   const [teamDetails, setTeamDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,16 +25,17 @@ const Auction = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
 
+  const [successMessage, setSuccessMessage] = useState(""); // State for success message
+
   const { isDarkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchTeams = async () => {
-      console.log("Fetching teams..."); // Debugging
+      console.log("Fetching teams...");
       try {
-        // const response = await api.get("/auction/team_list");
         const response = await apiWrapper("get", "/auction/team_list");
-        console.log("Teams fetched successfully:", response.data); // Log the successful response
+        console.log("Teams fetched successfully:", response.data);
         setTeams(response.data);
       } catch (error) {
         console.error("Error fetching teams:", error);
@@ -53,23 +51,22 @@ const Auction = () => {
 
   const handleCreateTeam = async () => {
     if (!teamName || !teamOwner || !teamLogo) {
-      alert("Please fill all fields: team name and team owner and team logo");
+      alert("Please fill all fields: team name, team owner, and team logo");
       return;
     }
 
     setIsLoading(true);
     try {
-        const response = await apiWrapper("post", "/auction/team/", {
-
+      const response = await apiWrapper("post", "/auction/team/", {
         team_name: teamName,
         team_owner: teamOwner,
         team_logo: teamLogo,
-
       });
-      alert(response.data.message);
+      setSuccessMessage(`Team ${teamName} created successfully!`); // Set success message
       setTeamName("");
       setTeamOwner("");
       setTeamLogo("");
+      console.log("Team creation response:", response);
     } catch (err) {
       console.error("❌ API Error:", err.response?.data || err.message);
     } finally {
@@ -85,16 +82,16 @@ const Auction = () => {
 
     setIsLoading(true);
     try {
-        const response = await apiWrapper("post", `/auction/team/${selectedTeam.value}/player/`, {
-
+      const response = await apiWrapper("post", `/auction/team/${selectedTeam.value}/player/`, {
         player_name: playerName,
         employee_id: employeeId,
         points_spent: parseInt(pointsSpent),
       });
-      alert(response.data.message);
+      setSuccessMessage(`Player ${playerName} sold to ${selectedTeam.label} with ${pointsSpent} points!`); // Set success message
       setPlayerName("");
       setEmployeeId("");
       setPointsSpent("");
+      console.log("Player addition response:", response);
     } catch (err) {
       console.error("❌ API Error:", err.response?.data || err.message);
     } finally {
@@ -103,7 +100,7 @@ const Auction = () => {
   };
 
   const handleGetTeamDetails = async () => {
-    console.log(`Fetching details for team: ${selectedTeam?.value}`); // Debugging
+    console.log(`Fetching details for team: ${selectedTeam?.value}`);
 
     if (!selectedTeam) {
       alert("Please select a team");
@@ -113,10 +110,9 @@ const Auction = () => {
 
     setIsLoading(true);
     try {
-        const response = await apiWrapper("get", `/auction/team_details/${selectedTeam.value}`);
-
+      const response = await apiWrapper("get", `/auction/team_details/${selectedTeam.value}`);
       setTeamDetails(response.data);
-      console.log("Fetched team details:", response.data); // Debugging
+      console.log("Fetched team details:", response.data);
     } catch (err) {
       console.error("❌ API Error:", err.response?.data || err.message);
       setTeamDetails(null);
@@ -125,7 +121,6 @@ const Auction = () => {
     }
   };
 
-  // Global Search Function
   const handleSearch = async () => {
     if (!searchTerm) {
       setSearchError("Please enter a Player Name or Employee ID");
@@ -139,13 +134,9 @@ const Auction = () => {
     try {
       let response;
       if (/^\d+$/.test(searchTerm)) {
-        // If input is all numbers, assume it's an Employee ID
         response = await apiWrapper("get", `/auction/playerdetails/${searchTerm}`);
-
       } else {
-        // Otherwise, assume it's a Player Name
         response = await apiWrapper("get", `/auction/player/${searchTerm}`);
-
       }
       setSearchResult(response.data);
     } catch (err) {
@@ -171,6 +162,19 @@ const Auction = () => {
           <h1 className="auction-heading">Auction Management</h1>
         </div>
 
+        {/* Success Message */}
+        {successMessage && (
+          <div className="success-message">
+            <div className="success-box">
+              <p>{successMessage}</p>
+              <FaTimes
+                className="close-icon"
+                onClick={() => setSuccessMessage("")} // Clear success message on close
+              />
+            </div>
+          </div>
+        )}
+
         {/* Global Search Bar */}
         <div className="search-bar">
           <div className="search-input-container">
@@ -188,7 +192,7 @@ const Auction = () => {
               }}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
-              {searchTerm && (
+            {searchTerm && (
               <FaTimes className="clear-icon" onClick={clearSearch} />
             )}
             <FaSearch className="search-icon" onClick={handleSearch} />
@@ -283,7 +287,7 @@ const Auction = () => {
                   value={selectedTeam}
                   onChange={(selectedOption) => setSelectedTeam(selectedOption)}
                   placeholder="Select or Type Team Name"
-                  isClearable={true} // Allow clearing the selection
+                  isClearable={true}
                 />
               </div>
 
@@ -322,7 +326,7 @@ const Auction = () => {
                   value={selectedTeam}
                   onChange={(selectedOption) => setSelectedTeam(selectedOption)}
                   placeholder="Select or Type Team Name"
-                  isClearable={true} // Allow clearing the selection
+                  isClearable={true}
                 />
               </div>
               <button onClick={handleGetTeamDetails} disabled={isLoading}>
