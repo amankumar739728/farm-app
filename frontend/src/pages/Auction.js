@@ -25,7 +25,8 @@ const Auction = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
 
-  const [successMessage, setSuccessMessage] = useState(""); // State for success message
+  const [successMessage, setSuccessMessage] = useState("");
+  const [teamCreationError, setTeamCreationError] = useState("");
 
   const { isDarkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ const Auction = () => {
       }
     };
     fetchTeams();
-  }, [navigate]);
+  }, [navigate, successMessage]); // Added successMessage as dependency to refresh team list after creation
 
   const onBackToDashboard = () => {
     navigate("/dashboard");
@@ -56,19 +57,25 @@ const Auction = () => {
     }
 
     setIsLoading(true);
+    setTeamCreationError("");
     try {
       const response = await apiWrapper("post", "/auction/team/", {
         team_name: teamName,
         team_owner: teamOwner,
         team_logo: teamLogo,
       });
-      setSuccessMessage(`Team ${teamName} created successfully!`); // Set success message
+      setSuccessMessage(`Team ${teamName} created successfully!`);
       setTeamName("");
       setTeamOwner("");
       setTeamLogo("");
       console.log("Team creation response:", response);
     } catch (err) {
       console.error("❌ API Error:", err.response?.data || err.message);
+      if (err.response?.status === 400 && err.response?.data?.detail === "Team already exists") {
+        setTeamCreationError("A team with this name already exists!");
+      } else {
+        setTeamCreationError("Failed to create team. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -87,13 +94,14 @@ const Auction = () => {
         employee_id: employeeId,
         points_spent: parseInt(pointsSpent),
       });
-      setSuccessMessage(`Player ${playerName} sold to ${selectedTeam.label} with ${pointsSpent} points!`); // Set success message
+      setSuccessMessage(`Player ${playerName} sold to ${selectedTeam.label} with ${pointsSpent} points!`);
       setPlayerName("");
       setEmployeeId("");
       setPointsSpent("");
       console.log("Player addition response:", response);
     } catch (err) {
       console.error("❌ API Error:", err.response?.data || err.message);
+      setSearchError(err.response?.data?.detail || "Failed to add player. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -116,6 +124,7 @@ const Auction = () => {
     } catch (err) {
       console.error("❌ API Error:", err.response?.data || err.message);
       setTeamDetails(null);
+      setSearchError("Failed to fetch team details. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -169,7 +178,7 @@ const Auction = () => {
               <p>{successMessage}</p>
               <FaTimes
                 className="close-icon"
-                onClick={() => setSuccessMessage("")} // Clear success message on close
+                onClick={() => setSuccessMessage("")}
               />
             </div>
           </div>
@@ -201,7 +210,7 @@ const Auction = () => {
 
         {/* Search Results */}
         {searchLoading && <p>Loading...</p>}
-        {searchError && <p className="text-red-500">{searchError}</p>}
+        {searchError && activeTab !== "createTeam" && <p className="text-red-500">{searchError}</p>}
         {searchResult && (
           <div className={`search-result-box ${searchResult.length === 1 ? "single-card" : ""}`}>
             <h2 className="search-result-heading">Search Results</h2>
@@ -230,7 +239,10 @@ const Auction = () => {
         <div className="tabs">
           <button
             className={`tab-button ${activeTab === "createTeam" ? "active" : ""}`}
-            onClick={() => setActiveTab("createTeam")}
+            onClick={() => {
+              setActiveTab("createTeam");
+              setTeamCreationError("");
+            }}
           >
             Create Team
           </button>
@@ -256,7 +268,10 @@ const Auction = () => {
                 type="text"
                 placeholder="Team Name"
                 value={teamName}
-                onChange={(e) => setTeamName(e.target.value)}
+                onChange={(e) => {
+                  setTeamName(e.target.value);
+                  setTeamCreationError("");
+                }}
                 onKeyDown={(e) => e.key === "Enter" && handleCreateTeam()}
               />
               <input
@@ -273,6 +288,11 @@ const Auction = () => {
                 onChange={(e) => setTeamLogo(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreateTeam()}
               />
+              {teamCreationError && (
+                <p className="error-message" style={{ color: 'red', margin: '10px 0' }}>
+                  {teamCreationError}
+                </p>
+              )}
               <button onClick={handleCreateTeam} disabled={isLoading}>
                 {isLoading ? "Creating..." : "Create Team"}
               </button>
