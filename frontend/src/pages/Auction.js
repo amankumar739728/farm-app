@@ -144,15 +144,23 @@ const Auction = () => {
       let response;
       if (/^\d+$/.test(searchTerm)) {
         response = await apiWrapper("get", `/auction/playerdetails/${searchTerm}`);
+        if (!response.data) {
+          throw new Error("Player not found");
+        }
+        setSearchResult(response.data);
       } else {
         response = await apiWrapper("get", `/auction/player/${searchTerm}`);
+        if (Array.isArray(response.data) && response.data.length === 0) {
+          throw new Error("Player not found");
+        }
+        setSearchResult(response.data);
       }
-      setSearchResult(response.data);
     } catch (err) {
-      setSearchError("No results found or an error occurred");
+      console.error("Search error:", err);
+      setSearchError(err.response?.data?.detail || err.message || "Player not found");
+    } finally {
+      setSearchLoading(false);
     }
-
-    setSearchLoading(false);
   };
 
   const clearSearch = () => {
@@ -208,9 +216,12 @@ const Auction = () => {
           </div>
         </div>
 
-        {/* Search Results */}
         {searchLoading && <p>Loading...</p>}
-        {searchError && activeTab !== "createTeam" && <p className="text-red-500">{searchError}</p>}
+        {searchError && (
+          <div className="error-message">
+            <p>{searchError}</p>
+          </div>
+        )}
         {searchResult && (
           <div className={`search-result-box ${searchResult.length === 1 ? "single-card" : ""}`}>
             <h2 className="search-result-heading">Search Results</h2>
