@@ -50,6 +50,6 @@ class ResetToken(Document):
         
 def format_team_name(team_name: str) -> str:
     """Formats the team name correctly with spaces and converts to uppercase."""
-    team_name = team_name.strip()
+    team_name = (team_name.strip()).lower()
     team_name = re.sub(r"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])", " ", team_name)
     return team_name.upper()

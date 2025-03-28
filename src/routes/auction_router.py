@@ -13,15 +13,49 @@ router = APIRouter()
 
 # 🆕 **Create a Team**
 
+# @router.post("/auction/team/")
+# async def create_team(team: TeamCreateSchema):
+#     existing_team = await Team.find_one(Team.team_name == team.team_name)
+#     if existing_team:
+#         raise HTTPException(status_code=400, detail="Team already exists")
+#     new_team = Team(team_name=team.team_name,team_owner=team.team_owner,team_logo=team.team_logo)
+#     print("New Team Data:", new_team)
+#     await new_team.insert()
+#     return {"message": f"Team {team.team_name} created successfully!"}
+
 @router.post("/auction/team/")
-async def create_team(team: TeamCreateSchema):
-    existing_team = await Team.find_one(Team.team_name == team.team_name)
+async def create_team(team: TeamCreateSchema, current_user: dict = Depends(get_current_user)):
+    # Normalize the team name by:
+    # 1. Trimming leading/trailing spaces
+    # 2. Replacing multiple spaces between words with single space
+    # normalized_team_name = re.sub(r' {2,}', ' ', team.team_name.strip())
+    formatted_team_name = format_team_name(team.team_name)
+    normalized_team_name = re.sub(r' {2,}', ' ', formatted_team_name.strip())
+    # Process multiple owners with proper name normalization
+    owners = []
+    for owner in team.team_owner.split('/'):
+        # For each owner: trim, then replace multiple spaces between names with single space
+        normalized_owner = re.sub(r' {2,}', ' ', owner.strip())
+        owners.append(normalized_owner)
+    
+    # Join with consistent separator
+    normalized_owners = '/'.join(owners)
+    # Check for existing team with normalized name (case-sensitive)
+    existing_team = await Team.find_one(Team.team_name == normalized_team_name)
+    
     if existing_team:
         raise HTTPException(status_code=400, detail="Team already exists")
-    new_team = Team(team_name=team.team_name,team_owner=team.team_owner,team_logo=team.team_logo)
+    
+    # Create new team with normalized name
+    new_team = Team(
+        team_name=normalized_team_name,
+        team_owner=normalized_owners,  # normalize owner name too
+        team_logo=team.team_logo.strip() if team.team_logo else None
+    )
+    
     print("New Team Data:", new_team)
     await new_team.insert()
-    return {"message": f"Team {team.team_name} created successfully!"}
+    return {"message": f"Team {normalized_team_name} created successfully!"}
 
 # 🔍 **Get Team List (New Endpoint)**
 @router.get("/auction/team_list", response_model=List[str],)
@@ -37,7 +71,7 @@ async def get_all_team_names(current_user: dict = Depends(get_current_user)):
 async def get_team(team_name: str,current_user: dict = Depends(get_current_user)):
     formatted_team_name = format_team_name(team_name)  # Format correctly
     print("Formatted Team Name:", formatted_team_name)
-    search_pattern = f"^{formatted_team_name[:4]}"  # First 4 letters
+    search_pattern = f"^{formatted_team_name}"  # Find teams starting with the formatted letters
 
     print(f"Searching MongoDB with: {search_pattern}")  # Debugging print
 
