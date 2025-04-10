@@ -1,6 +1,6 @@
 import React from "react";
-import { FaExternalLinkAlt, FaHome } from "react-icons/fa";
-
+import { FaExternalLinkAlt, FaHome,FaCheckCircle, FaInfoCircle, FaFont, FaCity } from "react-icons/fa";
+import "./PostEndpoint.css";
 const PostEndpoint = ({
   isLoading,
   handleDynamicResponseClick,
@@ -65,8 +65,47 @@ const PostEndpoint = ({
       ) : (
         dynamicResponse && (
           <div className="response-card">
-            <h3>POST Response</h3>
-            <pre>{JSON.stringify(dynamicResponse, null, 2)}</pre>
+            <div className="card-header">
+              <h3>API Response</h3>
+            </div>
+            <div className="card-body">
+              <div className="detail-row">
+                <FaInfoCircle className="detail-icon" />
+                <div className="detail-content">
+                  <span className="detail-label">Message:</span>
+                  <span className="detail-value">{dynamicResponse.message}</span>
+                </div>
+              </div>
+              
+              <div className="detail-row">
+                <FaCheckCircle className="detail-icon" />
+                <div className="detail-content">
+                  <span className="detail-label">Status:</span>
+                  <span className="detail-value" style={{ 
+                    color: dynamicResponse.status === 'success' ? 'green' : 'red',
+                    textTransform: 'capitalize'
+                  }}>
+                    {dynamicResponse.status}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="detail-row">
+                <FaFont className="detail-icon" />
+                <div className="detail-content">
+                  <span className="detail-label">Uppercase Name:</span>
+                  <span className="detail-value">{dynamicResponse.uppercase_name}</span>
+                </div>
+              </div>
+              
+              <div className="detail-row">
+                <FaCity className="detail-icon" />
+                <div className="detail-content">
+                  <span className="detail-label">Reversed City:</span>
+                  <span className="detail-value">{dynamicResponse.reversed_city}</span>
+                </div>
+              </div>
+            </div>
           </div>
         )
       )}

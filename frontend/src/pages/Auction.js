@@ -5,6 +5,7 @@ import "./Auction.css";
 import { FaHome, FaSearch, FaTimes } from "react-icons/fa";
 import Select from "react-select";
 import apiWrapper from "../api/apiWrapper";
+import { jwtDecode } from "jwt-decode";
 
 const Auction = () => {
   const [activeTab, setActiveTab] = useState("createTeam");
@@ -27,9 +28,53 @@ const Auction = () => {
 
   const [successMessage, setSuccessMessage] = useState("");
   const [teamCreationError, setTeamCreationError] = useState("");
+  const [accessError, setAccessError] = useState(""); // New state for access error messages
 
   const { isDarkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
+
+  const clearAllInputs = () => {
+    if (activeTab === "createTeam") {
+      setTeamName("");
+      setTeamOwner("");
+      setTeamLogo("");
+    } else if (activeTab === "addPlayer") {
+      setPlayerName("");
+      setEmployeeId("");
+      setPointsSpent("");
+      setSelectedTeam(null);
+    }
+    // Clear team details regardless of tab
+    setTeamDetails(null);
+  };
+
+  const clearAccessError = () => {
+    setAccessError("");
+    clearAllInputs();
+  };
+
+
+  const clearTeamCreationError = () => {
+    setTeamCreationError("");
+    clearAllInputs();
+  };
+
+  // Function to decode JWT token and get user role
+  const getUserRole = (token) => {
+    try {
+      const decodedToken = jwtDecode(token);
+      return decodedToken.role; // Adjust this based on your token structure
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      return null;
+    }
+  };
+
+  // Function to get access token from storage or context
+  const getAccessToken = () => {
+    // Retrieve the access token from local storage or context
+    return localStorage.getItem("token"); // Replace with actual token retrieval logic
+  };
 
   useEffect(() => {
     const fetchTeams = async () => {
@@ -50,7 +95,21 @@ const Auction = () => {
     navigate("/dashboard");
   };
 
+  useEffect(() => {
+    // Reset selected team and team details when switching tabs
+    setSelectedTeam(null);
+    setTeamDetails(null);
+  }, [activeTab]);
+
   const handleCreateTeam = async () => {
+    const token = getAccessToken();
+    const role = getUserRole(token);
+
+    if (role !== "admin") {
+      setAccessError("Admin access required to create a team.");
+      return;
+    }
+
     if (!teamName || !teamOwner || !teamLogo) {
       alert("Please fill all fields: team name, team owner, and team logo");
       return;
@@ -58,6 +117,7 @@ const Auction = () => {
 
     setIsLoading(true);
     setTeamCreationError("");
+    setAccessError(""); // Clear any previous access error
     try {
       const response = await apiWrapper("post", "/auction/team/", {
         team_name: teamName,
@@ -82,14 +142,23 @@ const Auction = () => {
   };
 
   const handleAddPlayer = async () => {
+    const token = getAccessToken();
+    const role = getUserRole(token);
+
+    if (role !== "admin") {
+      setAccessError("Admin access required to add a player to a team.");
+      return;
+    }
+
     if (!selectedTeam || !playerName || !employeeId || !pointsSpent) {
       alert("Please fill all fields: team, player name, employee ID, and points spent");
       return;
     }
 
     setIsLoading(true);
+    setAccessError("");
     try {
-      const response = await apiWrapper("post", `/auction/team/${selectedTeam.value}/player/`, {
+      await apiWrapper("post", `/auction/team/${selectedTeam.value}/player/`, {
         player_name: playerName,
         employee_id: employeeId,
         points_spent: parseInt(pointsSpent),
@@ -98,7 +167,6 @@ const Auction = () => {
       setPlayerName("");
       setEmployeeId("");
       setPointsSpent("");
-      console.log("Player addition response:", response);
     } catch (err) {
       console.error("❌ API Error:", err.response?.data || err.message);
       setSearchError(err.response?.data?.detail || "Failed to add player. Please try again.");
@@ -178,6 +246,18 @@ const Auction = () => {
           </button>
           <h1 className="auction-heading">Auction Management</h1>
         </div>
+
+        {accessError && (
+          <div className="error-message">
+            <div className="error-box">
+              <p>{accessError}</p>
+              <FaTimes
+                className="close-icon"
+                onClick={clearAccessError}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Success Message */}
         {successMessage && (
@@ -259,14 +339,18 @@ const Auction = () => {
           </button>
           <button
             className={`tab-button ${activeTab === "addPlayer" ? "active" : ""}`}
-            onClick={() => setActiveTab("addPlayer")}
+            onClick={() => {
+              setActiveTab("addPlayer");
+            }}
           >
             Add Player
           </button>
           <button
-            className={`tab-button ${activeTab === "teamDetails" ? "active" : ""}`}
-            onClick={() => setActiveTab("teamDetails")}
-          >
+      className={`tab-button ${activeTab === "teamDetails" ? "active" : ""}`}
+      onClick={() => {
+        setActiveTab("teamDetails");
+      }}
+    >
             Team Details
           </button>
         </div>
@@ -300,9 +384,15 @@ const Auction = () => {
                 onKeyDown={(e) => e.key === "Enter" && handleCreateTeam()}
               />
               {teamCreationError && (
-                <p className="error-message" style={{ color: 'red', margin: '10px 0' }}>
-                  {teamCreationError}
-                </p>
+                <div className="error-message">
+                  <div className="error-box">
+                    <p>{teamCreationError}</p>
+                    <FaTimes
+                      className="close-icon"
+                      onClick={clearTeamCreationError}
+                    />
+                  </div>
+                </div>
               )}
               <button onClick={handleCreateTeam} disabled={isLoading}>
                 {isLoading ? "Creating..." : "Create Team"}

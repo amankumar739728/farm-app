@@ -25,6 +25,11 @@ router = APIRouter()
 
 @router.post("/auction/team/")
 async def create_team(team: TeamCreateSchema, current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required to create a team.")
+    # if current_user.get("role") not in ["user", "admin", "team_manager"]:
+    #     raise HTTPException(status_code=403, detail="You do not have permission to create a team.")
+
     # Normalize the team name by:
     # 1. Trimming leading/trailing spaces
     # 2. Replacing multiple spaces between words with single space
@@ -94,7 +99,12 @@ async def get_team(team_name: str,current_user: dict = Depends(get_current_user)
 
 # 💰 **Add Player to Team (Auction Purchase)**
 @router.post("/auction/team/{team_name}/player/")
-async def add_player_to_team(team_name: str, player: PlayerAuction):
+async def add_player_to_team(team_name: str, player: PlayerAuction, current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required to add a player to a team.")
+    # if current_user.get("role") not in ["user", "admin", "team_manager"]:
+    #     raise HTTPException(status_code=403, detail="You do not have permission to add a player to this team.")
+
     # Check if the team exists
     team = await Team.find_one(Team.team_name == team_name)
     if not team:
@@ -172,3 +182,93 @@ async def get_player_by_name(request: Request, employee_id: str,current_user: di
                 }
 
     raise HTTPException(status_code=404, detail="Player not found")
+
+
+# @router.get("/auction/team/{team_name}/players")
+# async def get_players_by_team(team_name: str, current_user: dict = Depends(get_current_user)):
+#     """Get all players belonging to a specific team"""
+#     if current_user.get("role") != "admin":
+#         raise HTTPException(status_code=403, detail="Admin access required to view team players.")
+#     team = await Team.find_one(Team.team_name == team_name)
+#     if not team:
+#         raise HTTPException(status_code=404, detail="Team not found")
+    
+#     # Extract just the player names from the team's players
+#     player_names = [player.player_name for player in team.players]
+    
+#     return player_names
+
+
+@router.get("/auction/team/{team_name}/players")
+async def get_players_by_team(team_name: str, current_user: dict = Depends(get_current_user)):
+    """Get all players belonging to a specific team (case-insensitive and partial match)"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required to view team players.")
+    
+    # Create a regex pattern for case-insensitive matching
+    # Escape special regex characters in the team_name first
+    escaped_team_name = re.escape(team_name)
+    pattern = f".*{escaped_team_name}.*"
+    
+    # Find team with case-insensitive matching
+    team = await Team.find_one({
+        "team_name": {
+            "$regex": pattern,
+            "$options": "i"  # 'i' for case-insensitive
+        }
+    })
+    
+    if not team:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Team '{team_name}' not found."
+        )
+    
+    # Extract just the player names from the team's players
+    player_names = [player.player_name for player in team.players]
+    
+    return player_names
+
+@router.delete("/auction/team/{team_name}/player/{player_name}")
+async def remove_player_from_team(
+    team_name: str, 
+    player_name: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Remove a player from a team (supports partial and case-insensitive team name)"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required to remove a player from a team.")
+    escaped_team_name = re.escape(team_name)
+    # pattern = f"{escaped_team_name}"
+    pattern = f".*{escaped_team_name}.*"
+
+    team = await Team.find_one({
+        "team_name": {
+            "$regex": pattern,
+            "$options": "i"
+        }
+    })
+
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    
+    # Find the player to remove (case-insensitive match)
+    player_to_remove = None
+    for player in team.players:
+        if player.player_name.lower() == player_name.lower():
+            player_to_remove = player
+            break
+
+    if not player_to_remove:
+        raise HTTPException(status_code=404, detail="Player not found in this team")
+
+    # Adjust team budgets
+    team.remaining_budget += player_to_remove.points_spent
+    team.used_budget -= player_to_remove.points_spent
+
+    # Remove player
+    team.players = [p for p in team.players if p.player_name.lower() != player_name.lower()]
+
+    await team.save()
+
+    return {"message": f"Player {player_name} removed from {team.team_name} successfully"}

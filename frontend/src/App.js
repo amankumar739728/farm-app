@@ -117,10 +117,15 @@ import Signup from "./pages/Signup";
 import PrivateRoute from "./components/PrivateRoute";
 import Header from "./components/Header"; // ✅ Include Header
 import Auction from "./pages/Auction";
+import { AuthProvider } from "./context/AuthContext";
+import UserManagement from "./components/UserManagement";
+import RoleBasedRoute from "./components/RoleBasedRoute";
+import Profile from './components/Profile';
+import ChangePassword from './pages/ChangePassword';
 
 function App() {
   return (
-    <>
+    <AuthProvider>
       <Header />
       <Routes>
         <Route path="/" element={<Login />} />
@@ -130,8 +135,15 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} /> {/* ✅ Add Reset Password Route */}
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/auction" element={<Auction />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/user-management" element={ <RoleBasedRoute allowedRoles={["admin"]}>
+                <UserManagement />
+              </RoleBasedRoute>
+            }
+/>
       </Routes>
-    </>
+    </AuthProvider>
   );
 }
 

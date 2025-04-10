@@ -582,7 +582,30 @@ async def verify_jwt(request: Request, authorization: str):
 #             detail="Invalid authentication credentials",
 #             headers={"WWW-Authenticate": "Bearer"},
 #         )
-        
+ 
+ 
+ 
+#-------------------------------------------------------------------       
+# async def get_current_user(token: str = Depends(oauth2_scheme)):
+#     credentials_exception = HTTPException(
+#         status_code=status.HTTP_401_UNAUTHORIZED,
+#         detail="Could not validate credentials",
+#         headers={"WWW-Authenticate": "Bearer"},
+#     )
+#     try:
+#         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+#         app_log.info(f"Token payload: {payload}")
+#         username: str = payload.get("sub") # ✅ Extract "sub" instead of "username"
+#         if username is None:
+#             app_log.error("Token missing username in payload")
+#             raise credentials_exception
+#     except JWTError as e:
+#         app_log.error(f"JWT verification failed: {str(e)}")
+#         raise credentials_exception
+#     return username
+
+
+
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -592,14 +615,15 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         app_log.info(f"Token payload: {payload}")
-        username: str = payload.get("sub") # ✅ Extract "sub" instead of "username"
-        if username is None:
-            app_log.error("Token missing username in payload")
+        username: str = payload.get("sub")  # Extract "sub" for username
+        role: str = payload.get("role")  # Extract role from payload
+        if username is None or role is None:
+            app_log.error("Token missing username or role in payload")
             raise credentials_exception
     except JWTError as e:
         app_log.error(f"JWT verification failed: {str(e)}")
         raise credentials_exception
-    return username
+    return {"username": username, "role": role}
 
 
 # Middleware to validate JWT token
@@ -660,7 +684,7 @@ async def validate_authenticity(request: Request, call_next):
     # Skip token authentication for login and signup
     if request.url.path.startswith("/docs") or request.url.path.startswith("/openapi.json"):
         return await call_next(request)
-    if request.url.path.startswith("/login") or request.url.path.startswith("/signup"):
+    if request.url.path.startswith("/login") or request.url.path.startswith("/signup") or request.url.path.startswith("/create-root-user"):
         return await call_next(request)
     if request.url.path.startswith("/refresh-token"):  # Skip token authentication for /refresh-token as well
         return await call_next(request)

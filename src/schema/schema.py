@@ -1,4 +1,4 @@
-from pydantic import BaseModel,EmailStr
+from pydantic import BaseModel,EmailStr,Field
 from typing import List,Optional
 
 class AuthRequest(BaseModel):
@@ -23,6 +23,9 @@ class Token(BaseModel):
     
 class OTPResponse(BaseModel):
     message: str
+    
+class ChangeRoleRequest(BaseModel):
+    new_role: str
 
 class SampleResponse(BaseModel):
     message: str
@@ -83,5 +86,13 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+    
+class UserProfileUpdate(BaseModel):
+    firstname: Optional[str] = Field(..., min_length=1, max_length=50)
+    lastname: Optional[str] = Field(..., min_length=1, max_length=50)
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = Field(..., pattern="^[0-9]{10}$")
+    domain: Optional[str] = Field(..., min_length=2, max_length=50)
+    location: Optional[str] = Field(..., min_length=2, max_length=50)
     
     

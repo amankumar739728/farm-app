@@ -119,31 +119,45 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Response interceptor
 api.interceptors.response.use(
   response => response,
   async error => {
     const originalRequest = error.config;
 
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+      
       try {
-        const refreshToken = localStorage.getItem("refreshToken");
-        const response = await axios.post(`${API_URL}/refresh-token`, { refreshToken });
+        console.log("Refreshing token...");
+        const refreshToken = localStorage.getItem("tokenRefresh");
+        // Correct payload structure
+        const response = await axios.post(`${API_URL}/refresh-token`, { 
+          refresh_token: refreshToken  // Changed from refreshToken to refresh_token
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${refreshToken}`
+          }
+        });
+
         const newAccessToken = response.data.access_token;
         localStorage.setItem("token", newAccessToken);
         api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        console.error("🚨 Token Refresh Failed:", refreshError);
-        // logout();
-        // window.location.href = '/login';
+        console.error("Token refresh failed:", refreshError);
+        // Handle token refresh failure (e.g., redirect to login)
+        localStorage.removeItem("token");
+        localStorage.removeItem("tokenRefresh");
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
       }
     }
 
     return Promise.reject(error);
   }
 );
-
 
 export default api;
 

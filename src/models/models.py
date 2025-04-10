@@ -1,6 +1,6 @@
 from beanie import Document
 from typing import List, Optional
-from pydantic import BaseModel,EmailStr
+from pydantic import BaseModel,EmailStr,Field,validator
 import re
 from datetime import datetime, timedelta
 
@@ -23,19 +23,51 @@ class Team(Document):
     class Settings:
         name = "Team"  # MongoDB Collection Name
         
+# class User(Document):
+#     empid: str
+#     role: Optional[str] = "user"  # Added role field with default value
+#     firstname: str
+#     lastname: str
+#     email: EmailStr
+#     phone: str
+#     domain: str
+#     location: str
+#     username: str
+#     password: str
+#     otp: Optional[str] = None  # Store the OTP
+#     otp_expiry: Optional[datetime] = None  # Store the OTP expiry time
+    
+#     class Settings:
+#         name = "users"
+        
+        
+# New User class for User(Document):
 class User(Document):
-    empid: str
-    firstname: str
-    lastname: str
+    empid: str = Field(..., min_length=3, max_length=20, pattern="^[a-zA-Z0-9_-]+$")
+    role: str = Field("user", pattern="^(user|team_manager|analyst|admin)$")  # Including 'admin' role
+    firstname: str = Field(..., min_length=1, max_length=50)
+    lastname: str = Field(..., min_length=1, max_length=50)
     email: EmailStr
-    phone: str
-    domain: str
-    location: str
-    username: str
-    password: str
+    phone: str = Field(..., pattern="^[0-9]{10,15}$")
+    domain: str = Field(..., min_length=2, max_length=50)
+    location: str = Field(..., min_length=2, max_length=50)
+    username: str = Field(..., min_length=4, max_length=20, pattern="^[a-zA-Z0-9_]+$")
+    password: str = Field(..., min_length=8, max_length=100)
     otp: Optional[str] = None  # Store the OTP
     otp_expiry: Optional[datetime] = None  # Store the OTP expiry time
-    
+
+    @validator('password')
+    def validate_password(cls, v):
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not re.search(r"[0-9]", v):
+            raise ValueError("Password must contain at least one digit")
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", v):
+            raise ValueError("Password must contain at least one special character")
+        return v
+
     class Settings:
         name = "users"
         
@@ -53,3 +85,24 @@ def format_team_name(team_name: str) -> str:
     team_name = (team_name.strip()).lower()
     team_name = re.sub(r"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])", " ", team_name)
     return team_name.upper()
+
+def validate_password_complexity(password: str):
+    """
+    Validate password meets complexity requirements:
+    - At least 8 characters
+    - At least one uppercase letter
+    - At least one lowercase letter
+    - At least one digit
+    - At least one special character
+    """
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+    if not re.search(r"[A-Z]", password):
+        return False, "Password must contain at least one uppercase letter"
+    if not re.search(r"[a-z]", password):
+        return False, "Password must contain at least one lowercase letter"
+    if not re.search(r"[0-9]", password):
+        return False, "Password must contain at least one digit"
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        return False, "Password must contain at least one special character"
+    return True, ""

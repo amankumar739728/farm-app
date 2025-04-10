@@ -23,7 +23,7 @@ export const login = async (username, password) => {
 
 export const refreshToken = async () => {
   try {
-    const tokenRefresh = window.test_token_refresh; // Retrieve from memory
+    const tokenRefresh = localStorage.getItem("tokenRefresh");
     console.log("Refresh token ...", tokenRefresh);
     if (!tokenRefresh) throw new Error("No refresh token available");
 
@@ -50,6 +50,6 @@ export const refreshToken = async () => {
 
 export const logout = () => {
   localStorage.removeItem("token");
-  localStorage.removeItem("tokenRefresh"); // Ensure key matches
+  localStorage.removeItem("tokenRefresh");
   window.location.href = '/login';
 };

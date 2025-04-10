@@ -108,8 +108,9 @@ def generate_jwt(username: str):
     token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return token
 
-def create_access_token(data: dict, expires_delta: timedelta =None):
+def create_access_token(data: dict, role:str, expires_delta: timedelta =None):
     to_encode = data.copy()
+    to_encode["role"] = role  # Include the user's role
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
@@ -118,8 +119,9 @@ def create_access_token(data: dict, expires_delta: timedelta =None):
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
-def create_refresh_token(data: dict, expires_delta: timedelta = None):
+def create_refresh_token(data: dict, role: str, expires_delta: timedelta = None):
     to_encode = data.copy()
+    to_encode["role"] = role  # Include the user's role
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:

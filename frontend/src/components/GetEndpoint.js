@@ -1,6 +1,7 @@
 // src/components/GetEndpoint.js
 import React, { useState } from "react";
-import { FaSearch, FaHome } from "react-icons/fa";
+import { FaSearch, FaHome, FaInfoCircle, FaCheckCircle } from "react-icons/fa";
+import "./GetEndpoint.css";
 
 const GetEndpoint = ({ isLoading, handleDetailsClick, sampleResponse, onBackToDashboard }) => {
   const [fullname, setFullname] = useState("");
@@ -41,8 +42,31 @@ const GetEndpoint = ({ isLoading, handleDetailsClick, sampleResponse, onBackToDa
       ) : (
         sampleResponse && (
           <div className="response-card">
-            <h3>GET Response</h3>
-            <pre>{JSON.stringify(sampleResponse, null, 2)}</pre>
+            <div className="card-header">
+              <h3>API Response</h3>
+            </div>
+            <div className="card-body">
+              <div className="detail-row">
+                <FaInfoCircle className="detail-icon" />
+                <div className="detail-content">
+                  <span className="detail-label">Message:</span>
+                  <span className="detail-value">{sampleResponse.message}</span>
+                </div>
+              </div>
+              
+              <div className="detail-row">
+                <FaCheckCircle className="detail-icon" />
+                <div className="detail-content">
+                  <span className="detail-label">Status:</span>
+                  <span className="detail-value" style={{ 
+                    color: sampleResponse.status === 'success' ? 'green' : 'red',
+                    textTransform: 'capitalize'
+                  }}>
+                    {sampleResponse.status}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         )
       )}
