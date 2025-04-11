@@ -203,8 +203,8 @@ async def get_player_by_name(request: Request, employee_id: str,current_user: di
 @router.get("/auction/team/{team_name}/players")
 async def get_players_by_team(team_name: str, current_user: dict = Depends(get_current_user)):
     """Get all players belonging to a specific team (case-insensitive and partial match)"""
-    if current_user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required to view team players.")
+    # if current_user.get("role") != "admin":
+    #     raise HTTPException(status_code=403, detail="Admin access required to view team players.")
     
     # Create a regex pattern for case-insensitive matching
     # Escape special regex characters in the team_name first
@@ -234,8 +234,8 @@ async def get_players_by_team(team_name: str, current_user: dict = Depends(get_c
 @router.get("/auction/team/{team_name}/empid")
 async def get_players_by_team(team_name: str, current_user: dict = Depends(get_current_user)):
     """Get all players belonging to a specific team (case-insensitive and partial match)"""
-    if current_user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required to view team players.")
+    # if current_user.get("role") != "admin":
+    #     raise HTTPException(status_code=403, detail="Admin access required to view team players.")
     
     # Create a regex pattern for case-insensitive matching
     # Escape special regex characters in the team_name first
