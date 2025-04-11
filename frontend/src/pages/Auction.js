@@ -1346,12 +1346,10 @@ const Auction = () => {
   const handleRemovePlayer = async () => {
     const token = getAccessToken();
     const role = getUserRole(token);
-
     if (role !== "admin") {
       setAccessError("Admin access required to remove a player from a team.");
       return;
-    }
-
+    } 
     if (!selectedTeam || !selectedPlayer) {
       alert("Please select a team and a player to remove");
       return;
@@ -1363,6 +1361,11 @@ const Auction = () => {
       await apiWrapper("delete", `/auction/team/${selectedTeam.value}/player/${selectedPlayer.value}`);
       setSuccessMessage(`Player ${selectedPlayer.label} removed from ${selectedTeam.label} successfully!`);
       setSelectedPlayer(null);
+      
+      // Refresh the players list after successful removal
+      if (selectedTeam) {
+        await fetchPlayers(selectedTeam.value);
+      }
     } catch (err) {
       console.error("❌ API Error:", err.response?.data || err.message);
       setSearchError(err.response?.data?.detail || "Failed to remove player. Please try again.");
@@ -1471,10 +1474,13 @@ const Auction = () => {
     setIsLoading(true);
     try {
       const response = await apiWrapper("get", `/auction/team/${teamName}/players`);
-      setPlayers(response.data.map(player => ({ value: player, label: player })));
+      // Make sure to handle both array and non-array responses
+      const playersData = Array.isArray(response.data) ? response.data : [response.data];
+      setPlayers(playersData.map(player => ({ value: player, label: player })));
     } catch (err) {
       console.error("❌ API Error:", err.response?.data || err.message);
       setSearchError("Failed to fetch players. Please try again.");
+      setPlayers([]); // Reset players list on error
     } finally {
       setIsLoading(false);
     }
@@ -1501,6 +1507,9 @@ const Auction = () => {
       } else if (adminAction === "updatePlayer") {
         fetchEmployeeIds(selectedTeam.value);
       }
+    } else {
+      // Reset players list when no team is selected
+      setPlayers([]);
     }
   }, [selectedTeam, adminAction]);
 
@@ -1730,16 +1739,17 @@ const Auction = () => {
                     />
                   </div>
                   {selectedTeam && (
-                    <div className="input-with-clear">
-                      <Select
-                        options={players}
-                        value={selectedPlayer}
-                        onChange={(selectedOption) => setSelectedPlayer(selectedOption)}
-                        placeholder="Select or Type Player Name"
-                        isClearable={true}
-                      />
-                    </div>
-                  )}
+                      <div className="input-with-clear">
+                        <Select
+                          key={`player-select-${players.length}`}
+                          options={players}
+                          value={selectedPlayer}
+                          onChange={(selectedOption) => setSelectedPlayer(selectedOption)}
+                          placeholder="Select or Type Player Name"
+                          isClearable={true}
+                        />
+                      </div>
+                    )}
                   <button onClick={handleRemovePlayer} disabled={isLoading}>
                     {isLoading ? "Removing..." : "Remove Player"}
                   </button>

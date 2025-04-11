@@ -43,7 +43,7 @@
   gap: 20px;
   position: relative;
   background: mediumaquamarine;
-  margin-bottom: 25px;
+  margin-bottom: 15px;
 }
 
 /* Auction Heading */
@@ -252,7 +252,7 @@ input:focus {
   background-color: #444;
   color: white;
   border: 1px solid #66b3ff;
-  color:black;
+  color:white;
 }
 
 /* Form sections */
@@ -747,6 +747,7 @@ h2 {
   background-color: #444;
   color: white;
   border: 1px solid #66b3ff;
+  margin-top: 8px;
 }
 
 .dark-mode .search-icon {
@@ -911,8 +912,8 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: -16px;
-  margin-bottom: 23px;
+  margin-bottom: 0px;
+  margin-top: 0px;
 }
 
 .success-box p {
