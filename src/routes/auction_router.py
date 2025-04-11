@@ -1,7 +1,8 @@
 import re
-from fastapi import APIRouter, HTTPException,Depends,Request
+from fastapi import APIRouter, HTTPException,Depends,Request,Body
 from models.models import Team, PlayerAuction,format_team_name
-from schema.schema import TeamCreateSchema,TeamSchema 
+from schema.schema import TeamCreateSchema,TeamSchema
+from models.models import PlayerUpdateSchema
 from typing import List
 from common.servicename_app import app,get_current_user
 from services.servicename import Mainclass
@@ -229,6 +230,37 @@ async def get_players_by_team(team_name: str, current_user: dict = Depends(get_c
     
     return player_names
 
+
+@router.get("/auction/team/{team_name}/empid")
+async def get_players_by_team(team_name: str, current_user: dict = Depends(get_current_user)):
+    """Get all players belonging to a specific team (case-insensitive and partial match)"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required to view team players.")
+    
+    # Create a regex pattern for case-insensitive matching
+    # Escape special regex characters in the team_name first
+    escaped_team_name = re.escape(team_name)
+    pattern = f".*{escaped_team_name}.*"
+    
+    # Find team with case-insensitive matching
+    team = await Team.find_one({
+        "team_name": {
+            "$regex": pattern,
+            "$options": "i"  # 'i' for case-insensitive
+        }
+    })
+    
+    if not team:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Team '{team_name}' not found."
+        )
+    
+    # Extract just the player names from the team's players
+    player_empid = [player.employee_id for player in team.players]
+    
+    return player_empid
+
 @router.delete("/auction/team/{team_name}/player/{player_name}")
 async def remove_player_from_team(
     team_name: str, 
@@ -272,3 +304,108 @@ async def remove_player_from_team(
     await team.save()
 
     return {"message": f"Player {player_name} removed from {team.team_name} successfully"}
+
+
+@router.put("/auction/team/{team_name}/player/{employee_id}")
+async def update_player_details(
+    team_name: str,
+    employee_id: str,
+    updated_player: PlayerAuction = Body(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Update player details within a team by employee_id"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required to update player details.")
+
+    # Case-insensitive search for the team
+    escaped_team_name = re.escape(team_name)
+    pattern = f".*{escaped_team_name}.*"
+    team = await Team.find_one({
+        "team_name": {"$regex": pattern, "$options": "i"}
+    })
+
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+
+    # Locate the player by employee_id
+    player_to_update = None
+    for idx, player in enumerate(team.players):
+        if player.employee_id == employee_id:
+            player_to_update = player
+            player_index = idx
+            break
+
+    if not player_to_update:
+        raise HTTPException(status_code=404, detail=f"Player with employee_id {employee_id} not found in team")
+
+    # Adjust team budget if points_spent is being updated
+    if updated_player.points_spent != player_to_update.points_spent:
+        budget_diff = updated_player.points_spent - player_to_update.points_spent
+        if team.remaining_budget < budget_diff:
+            raise HTTPException(status_code=400, detail="Not enough budget to update player's points")
+        team.remaining_budget -= budget_diff
+        team.used_budget += budget_diff
+
+    # Update player details
+    team.players[player_index] = updated_player
+    await team.save()
+
+    return {"message": f"Player {employee_id} updated successfully in {team.team_name}"}
+
+
+@router.patch("/auction/team/{team_name}/player/{employee_id}")
+async def patch_player_details(
+    team_name: str,
+    employee_id: str,
+    updates: PlayerUpdateSchema,
+    current_user: dict = Depends(get_current_user)
+):
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required to update player details.")
+    escaped_team_name = re.escape(team_name)
+    pattern = f".*{escaped_team_name}.*"
+    team = await Team.find_one({
+        "team_name": {"$regex": pattern, "$options": "i"}
+    })
+
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+
+    # Find the player
+    player_index = None
+    for idx, player in enumerate(team.players):
+        if player.employee_id == employee_id:
+            player_index = idx
+            break
+
+    if player_index is None:
+        raise HTTPException(status_code=404, detail="Player not found")
+
+    player = team.players[player_index]
+
+    # Adjust budget if points_spent is updated
+    if updates.points_spent is not None:
+        budget_diff = updates.points_spent - player.points_spent
+        if budget_diff > 0 and team.remaining_budget < budget_diff:
+            raise HTTPException(status_code=400, detail="Not enough budget to update player's points")
+        team.remaining_budget -= budget_diff
+        team.used_budget += budget_diff
+        player.points_spent = updates.points_spent
+
+    # Update name if provided
+    if updates.player_name is not None:
+        player.player_name = updates.player_name
+
+    # Save updated player back into the list
+    team.players[player_index] = player
+    await team.save()
+
+    return {
+        "message": f"Player {employee_id} updated successfully in {team.team_name}",
+        "updated_data": {
+            "player_name": player.player_name,
+            "employee_id": player.employee_id,
+            "points_spent": player.points_spent
+        }
+    }
+    

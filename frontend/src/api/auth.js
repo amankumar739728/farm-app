@@ -10,7 +10,7 @@ export const login = async (username, password) => {
     if (!access_token || !refresh_token) throw new Error("No token received");
 
     localStorage.setItem("token", access_token);
-    localStorage.setItem("refreshToken", refresh_token); // Ensure consistent key usage
+    localStorage.setItem("tokenRefresh", refresh_token); // Ensure consistent key usage
 
     console.log("Tokens stored in localStorage:", { access_token, refresh_token });
 

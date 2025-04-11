@@ -10,6 +10,10 @@ class PlayerAuction(BaseModel):
     employee_id: str
     points_spent: int
 
+class PlayerUpdateSchema(BaseModel):
+    player_name: Optional[str] = None
+    points_spent: Optional[int] = None
+
 # Team Model (MongoDB Document)
 class Team(Document):
     team_name: str
